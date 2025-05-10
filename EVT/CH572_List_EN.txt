@@ -1,0 +1,68 @@
+
+Nanjing Qinheng Microelectronics Co., Ltd. 2025.03
+
+http://wch-ic.com
+
+
+Directory
+  |
+  |-- CH572: Bluetooth Low Energy - 32-bit RISC-V MCU
+  |      |-- EVT: CH572 related software routines
+  |      |      |-- EXAM: 
+  |      |      |      |-- SRC  
+  |      |      |      |      |-- Ld: link file
+  |      |      |      |      |-- RVMSIS: kernal system header file
+  |      |      |      |      |-- Startup: CH57x startup file
+  |      |      |      |      |-- StdPeriphDriver: basic peripheral driver source file and header file
+  |      |      |      |-- ADC: Analog-to-Digital Conversion using PWM and CMP for sampling routines. 
+  |      |      |      |-- CMP: Voltage comparator routine
+  |      |      |      |-- FLASH: on-chip flash routines: erase/read/write Code area and DataFlash area
+  |      |      |      |-- I2C: I2C routines, master/slave mode, data transceiver
+  |      |      |      |-- IAP
+  |      |      |      |      |-- APP: APP program routine used with IAP 
+  |      |      |      |      |-- USB_IAP: Routine to update on-chip program via USB 
+  |      |      |      |      |-- USBHS_IAP: Routine to update on-chip program via High-speed USB 
+  |      |      |      |      |-- UART_IAP: Routines to update the on-chip program via UART 
+  |      |      |      |      |-- WCHMcuIAP_WinAPP: IAP PC tools and source code
+  |      |      |      |-- PM: Syetem sleep mode and wake-up routine: GPIOA_5 as wake-up source, four power consumption levels
+  |      |      |      |-- PWMX: PWM1-5 output routine
+  |      |      |      |-- SPI: SPI routine, master/slave mode, data transceiver
+  |      |      |      |-- TMR: Timer routine  
+  |      |      |      |-- UART: UART receive/transmit routine
+  |      |      |      |-- USB
+  |      |      |      |      |-- Device
+  |      |      |      |      |      |-- COM: USB simulate CDC device routines
+  |      |      |      |      |      |-- VendorDefinedDev: simulate custom USB devices (CH372 device) routine, provide eight non-zero channels (upload + download), implement that data is first downloaded, and then the data content is reversed and uploaded
+  |      |      |      |      |      |-- CompoundDev: simulate keyboard/mouse routine, support HID class commands 
+  |      |      |      |      |      |-- HID_CompliantDev: USB simulate HID compliant device routines
+  |      |      |      |      |-- Host
+  |      |      |      |      |      |-- HostEnum:  simple enumeration procedure routine for USB devices
+  |      |      |      |      |      |-- HostAOA: USB host application routine, support connect to Android devices and communicate with APP
+  |      |      |      |      |      |-- U_DISK: U disk file system routine
+  |      |      |      |      |      |      |-- EXAM1.C: C Programming Language exam, read/write file in bytes, including creating files, deleting files, modifying file attribute, and modifying file name  
+  |      |      |      |      |      |      |-- EXAM10.C: C Programming Language exam, including creating files, deleting files, modifying file attribute, and modifying file name  
+  |      |      |      |      |      |      |-- EXAM11.C: C Programming Language exam, enumerate files in the root directory or specified directory  
+  |      |      |      |      |      |      |-- EXAM13.C: C Programming Language exam, create files with long file name  
+  |      |      |      |      |      |-- USB_LIB: U disk file system library file
+  |      |      |      |-- BLE
+  |      |      |      |      |-- Peripheral: peripheral role routine, custom including five services with different  attributes, including read attribute, write attribute, notify attribute, read/write attribute, and safe and readable attribute
+  |      |      |      |      |-- HID_Mouse: BLE mouse routine, simulate a mouse device, upload key value regularly after connected to the central
+  |      |      |      |      |-- HID_Consumer: BLE consumer routine, simulate user control device, upload volume key down key regularly after connected to the central
+  |      |      |      |      |-- Direct_Test_Mode£ºDTM test routine, combined with RF test tools
+  |      |      |      |      |-- RF_Basic: basic mode transmission and reception routine by 2.4G library 
+  |      |      |      |      |-- RF_PHY: non-standard wireless transceiver routines
+  |      |      |      |      |-- BackupUpgrade_IAP: backup wireless upgrade IAP routine, detect the current code flag, judge whether to move the backup area code to the user area and run the user area code
+  |      |      |      |      |-- BackupUpgrade_JumpIAP: backup wireless upgrade jump IAP routines, placed at the start address of the code,  for jumping to the IAP program
+  |      |      |      |      |-- BackupUpgrade_OTA: backup wireless upgrade user routine, add OTA function based on peripheral slave routines, store the upgraded firmware to the backup area and jump to the IAP program to upgrade
+  |      |      |      |      |-- HAL: Hardware-related files shared by routines
+  |      |      |      |      |-- LIB: BLE protocol stack library file and header file
+  |      |      |      |      |-- Qinheng Low Energy Bluetooth Software Development Reference Manual.pdf
+  |      |      |      |      |-- WCH Bluetooth Over-the-Air Upgrade (BLE OTA).PDF
+  |      |      |      |      |-- BLE Certification: Product: WCH CH57x QDID: 179771
+  |      |      |-- PUB: CH572EVT evaluation board schematic and manual
+  |      |      |-- PUB
+  |      |      |      |-- SCHPCB: Reference schematic and PCB files
+  |      |      |      |-- CH572 Evaluation Board Schematic (CH572SCH.pdf)
+  |      |      |      |-- CH572 Evaluation Board User Manual.pdf
+  |      |      |      |-- Important Considerations for Circuit and PCB Design of Bluetooth Chip.pdf
+  |
