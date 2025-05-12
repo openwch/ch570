@@ -99,6 +99,10 @@ uint32_t RTC_InitClock(RTC_OSCCntTypeDef cnt)
 {
     uint32_t count;
     uint32_t cyc;
+    uint32_t last_ov_cnt = 0;
+    uint32_t new_ov_cnt = 0;
+    uint32_t ov_cnt_ov_cnt = 0;
+
     if(cnt<Count_32)
     {
         cyc = 1<<cnt;
@@ -121,8 +125,16 @@ uint32_t RTC_InitClock(RTC_OSCCntTypeDef cnt)
     R8_OSC_CAL_CTRL = cnt;
     R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
     sys_safe_access_disable();
-    while(!(R16_OSC_CAL_CNT&RB_OSC_CAL_IF));
-    count = ((uint32_t)R16_OSC_CAL_CNT&RB_OSC_CAL_CNT) + (uint32_t)R8_OSC_CAL_OV_CNT*16384;
+    while(!(R16_OSC_CAL_CNT&RB_OSC_CAL_IF))
+    {
+        new_ov_cnt = R8_OSC_CAL_OV_CNT;
+        if(new_ov_cnt<last_ov_cnt)
+        {
+            ov_cnt_ov_cnt++;
+        }
+        last_ov_cnt = new_ov_cnt;
+    }
+    count = ((uint32_t)R16_OSC_CAL_CNT&RB_OSC_CAL_CNT) + ((uint32_t)R8_OSC_CAL_OV_CNT+ov_cnt_ov_cnt*256)*16384;
     Freq_LSI = GetSysClock()/(count/cyc);
     return Freq_LSI;
 }

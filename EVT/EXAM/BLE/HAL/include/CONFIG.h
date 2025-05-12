@@ -29,9 +29,6 @@
  【MAC】
  BLE_MAC                                    - 是否自定义蓝牙Mac地址 ( 默认:FALSE - 使用芯片Mac地址 )，需要在main.c修改Mac地址定义
 
- 【DCDC】
- DCDC_ENABLE                                - 是否使能DCDC ( 默认:FALSE )
-
  【SLEEP】
  HAL_SLEEP                                  - 是否开启睡眠功能 ( 默认:FALSE )
  SLEEP_RTC_MIN_TIME                         - 非空闲模式下睡眠的最小时间（单位：一个RTC周期）
@@ -76,9 +73,6 @@
  */
 #ifndef BLE_MAC
 #define BLE_MAC                             FALSE
-#endif
-#ifndef DCDC_ENABLE
-#define DCDC_ENABLE                         FALSE
 #endif
 #ifndef HAL_SLEEP
 #define HAL_SLEEP                           FALSE

@@ -43,7 +43,7 @@
  *
  * @param   cmd         - CMD_* for caller from FlashROM or RAM.
  * @param   StartAddr   - Address of the data to be process.
- * @param   Buffer      - Pointer to the buffer where data should be process, Must be aligned to 4 bytes.
+ * @param   Buffer      - Pointer to the buffer where data should be process, Must in RAM and be aligned to 4 bytes.
  * @param   Length      - Size of data to be process, in bytes.
  *
  * @return  0-SUCCESS  (!0)-FAILURE
@@ -67,7 +67,7 @@ extern uint32_t FLASH_EEPROM_CMD( uint8_t cmd, uint32_t StartAddr, void *Buffer,
 /**
  * @brief   get 6 bytes MAC address
  *
- * @param   Buffer      - Pointer to the buffer where data should be stored, Must be aligned to 4 bytes.
+ * @param   Buffer      - Pointer to the buffer where data should be stored, Must in RAM and be aligned to 4 bytes.
  *
  * @return  0-SUCCESS  (!0)-FAILURE
  */
@@ -76,7 +76,7 @@ extern uint32_t FLASH_EEPROM_CMD( uint8_t cmd, uint32_t StartAddr, void *Buffer,
 /**
  * @brief   get 8 bytes BOOT information
  *
- * @param   Buffer      - Pointer to the buffer where data should be stored, Must be aligned to 4 bytes.
+ * @param   Buffer      - Pointer to the buffer where data should be stored, Must in RAM and be aligned to 4 bytes.
  *
  * @return  0-SUCCESS  (!0)-FAILURE
  */
@@ -110,7 +110,7 @@ extern uint32_t FLASH_EEPROM_CMD( uint8_t cmd, uint32_t StartAddr, void *Buffer,
  * @brief   write FlashROM data block, minimal block is dword.
  *
  * @param   StartAddr   - Address of the data to be written.
- * @param   Buffer      - Pointer to the source buffer, Must be aligned to 4 bytes.
+ * @param   Buffer      - Pointer to the source buffer, Must in RAM and be aligned to 4 bytes.
  * @param   Length      - Size of data to be written, in bytes.
  *
  * @return  0-SUCCESS  (!0)-FAILURE
@@ -121,7 +121,7 @@ extern uint32_t FLASH_EEPROM_CMD( uint8_t cmd, uint32_t StartAddr, void *Buffer,
  * @brief   verify FlashROM data block, minimal block is dword.
  *
  * @param   StartAddr   - Address of the data to verify.
- * @param   Buffer      - Pointer to the source buffer, Must be aligned to 4 bytes.
+ * @param   Buffer      - Pointer to the source buffer, Must in RAM and be aligned to 4 bytes.
  * @param   Length      - Size of data to verify, in bytes.
  *
  * @return  0-SUCCESS  (!0)-FAILURE

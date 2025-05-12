@@ -65,7 +65,7 @@ typedef enum
     UART_RX_REMAP_PA3,     /*!<ÖØÓ³Éä£¨RXD/PA3£© */
     UART_RX_REMAP_PA0,     /*!<ÖØÓ³Éä£¨RXD/PA0£© */
     UART_RX_REMAP_PA1,     /*!<ÖØÓ³Éä£¨RXD/PA1£© */
-    UART_RX_REMAP_PA4,     /*!<ÖØÓ³Éä£¨RXD/PA4£© */
+    UART_RX_REMAP_PA6,     /*!<ÖØÓ³Éä£¨RXD/PA6£© */
     UART_RX_REMAP_PA9,     /*!<ÖØÓ³Éä£¨RXD/PA9£© */
     UART_RX_REMAP_PA10,    /*!<ÖØÓ³Éä£¨RXD/PA10£© */
     UART_RX_REMAP_PA11,    /*!<ÖØÓ³Éä£¨RXD/PA11£© */

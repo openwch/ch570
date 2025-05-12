@@ -56,9 +56,8 @@ __INTERRUPT
 __HIGH_CODE
 void RTC_IRQHandler( void )
 {
-    uint32_t trig_time;
-
     R8_RTC_FLAG_CTRL =(RB_RTC_TMR_CLR|RB_RTC_TRIG_CLR);
+    RTCTigFlag = 1;
 }
 
 __HIGH_CODE
@@ -78,6 +77,26 @@ static void SYS_SetPendingIRQ(void)
 }
 
 /*******************************************************************************
+ * @fn          BLE_ClockConfig
+ *
+ * @brief       BLE_ClockConfig
+ *
+ * @param       conf.
+ */
+bleClockConfig_t BLE_ClockConfig(uint32_t lsifreq)
+{
+    bleClockConfig_t conf;
+
+    conf.ClockAccuracy = 2500;
+    conf.ClockFrequency = lsifreq;
+    conf.ClockMaxCount = RTC_MAX_COUNT;
+    conf.getClockValue = SYS_GetClockValue;
+    conf.SetPendingIRQ = SYS_SetPendingIRQ;
+
+    return conf;
+}
+
+/*******************************************************************************
  * @fn      HAL_Time0Init
  *
  * @brief   系统定时器初始化
@@ -88,8 +107,8 @@ static void SYS_SetPendingIRQ(void)
  */
 void HAL_TimeInit(void)
 {
-    bleClockConfig_t conf;
-
+  bleClockConfig_t conf;
+  
   sys_safe_access_enable();
   R8_LSI_CONFIG |= RB_CLK_LSI_PON;
   sys_safe_access_disable();
@@ -100,11 +119,7 @@ void HAL_TimeInit(void)
 
   RTC_InitTime( 2021,1,28,0,0,0 );
 
-  conf.ClockAccuracy = 1000;
-  conf.ClockFrequency = lsiFrq;
-  conf.ClockMaxCount = RTC_MAX_COUNT;
-  conf.getClockValue = SYS_GetClockValue;
-  conf.SetPendingIRQ = SYS_SetPendingIRQ;
+  conf = BLE_ClockConfig(lsiFrq);
   TMOS_TimerInit( &conf );
 
   sys_safe_access_enable();

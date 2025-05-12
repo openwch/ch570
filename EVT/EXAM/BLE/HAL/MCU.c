@@ -175,7 +175,14 @@ tmosEvents HAL_ProcessEvent(tmosTaskID task_id, tmosEvents events)
     if(events & HAL_REG_INIT_EVENT)
     {
 #if(defined BLE_CALIBRATION_ENABLE) && (BLE_CALIBRATION_ENABLE == TRUE) // 校准任务，单次校准耗时小于10ms
+        uint8_t state;
+        bleClockConfig_t conf;
+
         BLE_RegInit();                                                  // 校准RF，会关闭RF并改变RF相关寄存器，如果使用了RF收发函数需注意校准后再重新启用
+        lsiFrq = RTC_InitClock( Count_1024 );
+        conf = BLE_ClockConfig(lsiFrq);
+        state = TMOS_TimerSet(&conf);
+        LSIWakeup_MaxTime = GET_WakeUpLSIMaxTime();
         tmos_start_task(halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME(BLE_CALIBRATION_PERIOD));
         return events ^ HAL_REG_INIT_EVENT;
 #endif

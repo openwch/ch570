@@ -332,8 +332,8 @@ extern "C" {
 #define R32_POWER_MANAG     (*((PUINT32V)0x40001020)) // RWA, power management register, SAM
 #define R16_POWER_PLAN      (*((PUINT16V)0x40001020)) // RWA, power plan before sleep instruction, SAM
 #define  RB_PWR_PLAN_EN     0x8000                    // RWA/WZ, power plan enable, auto clear after sleep executed
-// #define  RB_XT_PRE_EN       0x4000                    // RWA, extern 32MHz HSE early wake up enable, must be used with LSI
-// #define  RB_PWR_MUST_0      0x2000                    // RWA, must write 0
+#define  RB_XT_PRE_EN       0x4000                    // RWA, extern 32MHz HSE early wake up enable, must be used with LSI
+#define  RB_PWR_MUST_0      0x2000                    // RWA, must write 0
 // #define  RB_XT_PRE_CFG      0x1800                    // RWA, extern 32MHz HSE early wake up time configuration
 #define  RB_PWR_LDO5V_EN    0x0100                    // RWA, internal LDO5v enable,1=power by V5,0=power by VDD33 
 #define  RB_PWR_SYS_EN      0x80                      // RWA, power for system
@@ -479,7 +479,7 @@ extern "C" {
 #define R32_PA_PD_DRV       (*((PUINT32V)0x400010B4)) // RW, PA pulldown for input or PA driving capability for output
 #define R8_PA_PD_DRV_0      (*((PUINT8V)0x400010B4))  // RW, PA pulldown for input or PA driving capability for output byte 0
 #define R8_PA_PD_DRV_1      (*((PUINT8V)0x400010B5))  // RW, PA pulldown for input or PA driving capability for output byte 1
-#define R32_PA_SET          (*((PUINT32V)0x400010B8)) // RW, PA set high for output ,1=set output high,0=IDLE
+#define R32_PA_SET          (*((PUINT32V)0x400010B8)) // WZ, PA set high for output ,1=set output high,0=IDLE
 /* KEYSCAN register */
 #define R16_KEY_SCAN_CTRL    (*((PUINT16V)0x40001064))// KEY SCAN control register
 #define  RB_CLR_WAKEUP_EN   0x4000                   // RW, claer wake_up siginal after chip wakeing up, 1=enable 0=disable 

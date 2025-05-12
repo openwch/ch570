@@ -14,6 +14,8 @@
 /* 头文件包含 */
 #include "HAL.h"
 
+uint16_t LSIWakeup_MaxTime;
+
 /*******************************************************************************
  * @fn          CH57x_LowPower
  *
@@ -31,10 +33,10 @@ uint32_t CH57x_LowPower(uint32_t time)
     unsigned long irq_status;
 
     // 提前唤醒
-    if (time <= WAKE_UP_RTC_MAX_TIME) {
-        time_tign = time + (RTC_MAX_COUNT - WAKE_UP_RTC_MAX_TIME);
+    if (time <= LSIWakeup_MaxTime) {
+        time_tign = time + (RTC_MAX_COUNT - LSIWakeup_MaxTime);
     } else {
-        time_tign = time - WAKE_UP_RTC_MAX_TIME;
+        time_tign = time - LSIWakeup_MaxTime;
     }
 
     SYS_DisableAllIrq(&irq_status);
@@ -64,12 +66,30 @@ uint32_t CH57x_LowPower(uint32_t time)
     // LOW POWER-sleep模式
     if(!RTCTigFlag)
     {
-        LowPower_Sleep(RB_PWR_RAM12K | RB_PWR_EXTEND | RB_PWR_XROM );
+        LowPower_Sleep(RB_PWR_RAM12K | RB_PWR_EXTEND | RB_XT_PRE_EN );
         HSECFG_Current(HSE_RCur_100); // 降为额定电流(低功耗函数中提升了HSE偏置电流)
         return 0;
     }
 #endif
     return 3;
+}
+
+/*******************************************************************************
+ * @fn          GET_WakeUpLSIMaxTime
+ *
+ * @brief       获取当前提前唤醒时间
+ *
+ * @param       none
+ */
+uint16_t GET_WakeUpLSIMaxTime(void)
+{
+    uint16_t pre_time;
+
+    pre_time = RTC_TO_US(45)+200;
+    pre_time = pre_time > 1600 ? pre_time:1600;
+    pre_time = US_TO_RTC(pre_time);
+
+    return pre_time;
 }
 
 /*******************************************************************************
@@ -91,5 +111,7 @@ void HAL_SleepInit(void)
     R8_RTC_MODE_CTRL |= RB_RTC_TRIG_EN;  // 触发模式
     sys_safe_access_disable();
     PFIC_EnableIRQ(RTC_IRQn);
+    LSIWakeup_MaxTime = GET_WakeUpLSIMaxTime();
+//    PRINT("Pre_time %d\n",LSIWakeup_MaxTime);
 #endif
 }

@@ -47,6 +47,8 @@ void PWR_PeriphClkCfg(FunctionalState s, uint16_t perph)
  *
  * @param   s       - 是否打开此外设睡眠唤醒功能
  * @param   perph   - 需要设置的唤醒源
+ *                    RB_GPIO_WAKE_MODE -  GPIO边沿唤醒模式使能 1:边沿唤醒,RB_SLP_GPIO_EDGE_MODE=1,双边沿唤醒
+ *                                         RB_SLP_GPIO_EDGE_MODE=0,上升沿唤醒;0:电平唤醒
  *                    RB_SLP_USB_WAKE   -  USBFS 为唤醒源
  *                    RB_SLP_USB2_WAKE  -  USBHS 为唤醒源
  *                    RB_SLP_RTC_WAKE   -  RTC 为唤醒源
@@ -210,7 +212,7 @@ void LowPower_Sleep(uint16_t rm)
 
     PFIC->SCTLR |= (1 << 2); //deep sleep
 
-    power_plan |= RB_PWR_PLAN_EN | RB_PWR_CORE | rm | (2<<11);
+    power_plan = RB_PWR_PLAN_EN | RB_PWR_CORE | rm | (2<<11);
 
     sys_safe_access_enable();
 
@@ -218,6 +220,9 @@ void LowPower_Sleep(uint16_t rm)
     R8_SLP_POWER_CTRL |= 0x40;
 
     R16_POWER_PLAN = power_plan;
+    sys_safe_access_disable();
+    sys_safe_access_enable();
+    R8_CLK_SYS_CFG = CLK_SOURCE_HSE_PLL_24MHz;
     sys_safe_access_disable();
 //    if((R16_CLK_SYS_CFG & RB_CLK_SYS_MOD) == 0x40)
 //    {
@@ -233,14 +238,14 @@ void LowPower_Sleep(uint16_t rm)
     __nop();
     __nop();
 
-//    sys_safe_access_enable();
-//    R16_CLK_SYS_CFG = clk_sys_cfg;
+    sys_safe_access_enable();
+    R8_CLK_SYS_CFG = clk_sys_cfg;
 //    R8_HFCK_PWR_CTRL = hfck_pwr_ctrl;
-//    sys_safe_access_disable();
+    sys_safe_access_disable();
     sys_safe_access_enable();
     R16_POWER_PLAN &= ~RB_PWR_PLAN_EN;
+    R16_POWER_PLAN &= ~RB_XT_PRE_EN;
     sys_safe_access_disable();
-
 //    sys_safe_access_enable();
 //    R8_PLL_CONFIG &= ~(1 << 5);
 //    sys_safe_access_disable();
@@ -278,6 +283,7 @@ void LowPower_Shutdown(uint16_t rm)
 
     PFIC->SCTLR |= (1 << 2); //deep sleep
 
+    SetSysClock(CLK_SOURCE_HSE_PLL_24MHz);
     sys_safe_access_enable();
     R8_SLP_POWER_CTRL |= 0x40;
     sys_safe_access_disable();

@@ -59,7 +59,7 @@ int main()
 
     PWMX_CLKCfg(4);                                   // cycle = 4/Fsys
     PWM_16bit_CycleEnable();                          // 16位宽使能
-    PWMX_16bit_CycleCfg(CH_PWM_ALL, 60000);           // 16 数据宽度时的PWM时钟周期
+    PWMX_16bit_CycleCfg(CH_PWM_ALL, 60000-1);           // 16 数据宽度 Ncyc=RB_PWM_CYC_VALUE+1
     PWMX_16bit_ACTOUT(CH_PWM1, 30000, Low_Level, ENABLE);  // 50%占空比
     PWMX_16bit_ACTOUT(CH_PWM2, 15000, Low_Level, ENABLE);  // 25%占空比
     PWMX_16bit_ACTOUT(CH_PWM3, 45000, Low_Level, ENABLE);  // 75%占空比

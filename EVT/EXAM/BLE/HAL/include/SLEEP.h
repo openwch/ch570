@@ -23,6 +23,7 @@ extern "C" {
  */
 typedef void (*pfnLowPowerGapProcessCB_t)( void );
 
+extern uint16_t LSIWakeup_MaxTime;
 /*********************************************************************
  * FUNCTIONS
  */
@@ -40,6 +41,14 @@ extern void HAL_SleepInit(void);
  * @return  state.
  */
 extern uint32_t CH57x_LowPower(uint32_t time);
+
+/**
+ * @brief   获取当前提前唤醒时间
+ *
+ * @param   none.
+ */
+extern uint16_t GET_WakeUpLSIMaxTime(void);
+
 
 /*********************************************************************
 *********************************************************************/

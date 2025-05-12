@@ -664,6 +664,7 @@ int main()
     pEP2_RAM_Addr = EP2_Databuf;
     pEP3_RAM_Addr = EP3_Databuf;
 
+    R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;//使用USB要关掉两线调试
     USB_DeviceInit();
 
     PFIC_EnableIRQ(USB_IRQn);

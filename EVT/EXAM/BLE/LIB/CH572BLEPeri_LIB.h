@@ -1,7 +1,7 @@
 /********************************** (C) COPYRIGHT ******************************
  * File Name         : CH572BLEPeri_LIB.H
  * Author            : WCH
- * Version           : V1.10
+ * Version           : V1.20
  * Date              : 2024/03/14
  * Description       : head file(CH572)
  * Copyright (c) 2023 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -139,7 +139,7 @@ typedef struct
 /*********************************************************************
  * GLOBAL MACROS
  */
-#define VER_FILE  "CH572_BLE_PERI_LIB_V1.1"
+#define VER_FILE  "CH572_BLE_PERI_LIB_V1.2"
 extern const uint8_t VER_LIB[];  // LIB version
 #define SYSTEM_TIME_MICROSEN            625   // unit of process event timer is 625us
 #define MS1_TO_SYSTEM_TIME(x)  ((x)*1000/SYSTEM_TIME_MICROSEN)   // transform unit in ms to unit in 625us ( attentional bias )
