@@ -1,0 +1,25 @@
+{
+  "beacon_mode": 2,
+  "beacon_mode_name": "Eddystone-TLM (with sensor)",
+  "sensor_enabled": true,
+  "tx_power_dbm": 0,
+  "adv_interval_ms": 2000,
+  "eddystone_uid": {
+    "namespace_id": "00010203040506070809",
+    "instance_id": "000000000001"
+  },
+  "eddystone_url": {
+    "scheme": 1,
+    "url": "wch.cn"
+  },
+  "ibeacon": {
+    "uuid": "00000000000000000000000000000000",
+    "major": 0,
+    "minor": 0
+  },
+  "sensor": {
+    "update_rate_sec": 10,
+    "i2c_address": "0x44",
+    "repeatability": 2
+  }
+}

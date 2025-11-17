@@ -1,0 +1,25 @@
+{
+  "beacon_mode": 1,
+  "beacon_mode_name": "Eddystone-URL",
+  "sensor_enabled": false,
+  "tx_power_dbm": 4,
+  "adv_interval_ms": 500,
+  "eddystone_uid": {
+    "namespace_id": "00010203040506070809",
+    "instance_id": "000000000001"
+  },
+  "eddystone_url": {
+    "scheme": 1,
+    "url": "wch.cn"
+  },
+  "ibeacon": {
+    "uuid": "00000000000000000000000000000000",
+    "major": 0,
+    "minor": 0
+  },
+  "sensor": {
+    "update_rate_sec": 5,
+    "i2c_address": "0x44",
+    "repeatability": 2
+  }
+}
