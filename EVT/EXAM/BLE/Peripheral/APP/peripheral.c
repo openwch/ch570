@@ -1,13 +1,16 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : peripheral.C
- * Author             : WCH
- * Version            : V1.0
- * Date               : 2018/12/10
- * Description        : 外设从机多连接应用程序，初始化广播连接参数，然后广播，连接主机后，
- *                      请求更新连接参数，通过自定义服务传输数据
+ * Author             : WCH (Modified for Broadcaster-Only Mode)
+ * Version            : V2.0 (Broadcaster Only)
+ * Date               : 2018/12/10 (Modified: 2025)
+ * Description        : BROADCASTER-ONLY MODE APPLICATION
+ *                      This peripheral application has been converted to broadcaster-only mode.
+ *                      It broadcasts BLE advertising packets (non-connectable) continuously.
+ *                      Connection handling, GATT services, and bonding are disabled.
+ *                      Device name: "Broadcaster Only CH570"
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * Attention: This software (modified or not) and binary are used for 
+ * Attention: This software (modified or not) and binary are used for
  * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
@@ -82,35 +85,33 @@
 static uint8_t Peripheral_TaskID = INVALID_TASK_ID; // Task ID for internal task/event processing
 
 // GAP - SCAN RSP data (max size = 31 bytes)
+// Note: For broadcaster-only mode, scan response is still useful for additional data
 static uint8_t scanRspData[] = {
     // complete name
-    0x12, // length of this data
+    0x14, // length of this data
     GAP_ADTYPE_LOCAL_NAME_COMPLETE,
-    'S',
-    'i',
-    'm',
-    'p',
-    'l',
-    'e',
-    ' ',
-    'P',
-    'e',
+    'B',
     'r',
-    'i',
-    'p',
-    'h',
-    'e',
-    'r',
+    'o',
     'a',
+    'd',
+    'c',
+    'a',
+    's',
+    't',
+    'e',
+    'r',
+    ' ',
+    'O',
+    'n',
     'l',
-    // connection interval range
-    0x05, // length of this data
-    GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), // 100ms
-    HI_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL),
-    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), // 1s
-    HI_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
-
+    'y',
+    ' ',
+    'C',
+    'H',
+    '5',
+    '7',
+    '0',
     // Tx power level
     0x02, // length of this data
     GAP_ADTYPE_POWER_LEVEL,
@@ -136,7 +137,7 @@ static uint8_t advertData[] = {
 };
 
 // GAP GATT Attributes
-static uint8_t attDeviceName[GAP_DEVICE_NAME_LEN] = "Simple Peripheral";
+static uint8_t attDeviceName[GAP_DEVICE_NAME_LEN] = "Broadcaster Only CH570";
 
 // Connection item list
 static peripheralConnItem_t peripheralConnList;
@@ -205,18 +206,18 @@ void Peripheral_Init()
 {
     Peripheral_TaskID = TMOS_ProcessEventRegister(Peripheral_ProcessEvent);
 
-    // Setup the GAP Peripheral Role Profile
+    // Setup the GAP Peripheral Role Profile - BROADCASTER ONLY MODE
     {
         uint8_t  initial_advertising_enable = TRUE;
-        uint16_t desired_min_interval = DEFAULT_DESIRED_MIN_CONN_INTERVAL;
-        uint16_t desired_max_interval = DEFAULT_DESIRED_MAX_CONN_INTERVAL;
+        uint8_t  adv_event_type = GAP_ADTYPE_ADV_NONCONN_IND;  // Non-connectable advertising
 
         // Set the GAP Role Parameters
         GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8_t), &initial_advertising_enable);
+        GAPRole_SetParameter(GAPROLE_ADV_EVENT_TYPE, sizeof(uint8_t), &adv_event_type); // BROADCASTER MODE
         GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData), scanRspData);
         GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);
-        GAPRole_SetParameter(GAPROLE_MIN_CONN_INTERVAL, sizeof(uint16_t), &desired_min_interval);
-        GAPRole_SetParameter(GAPROLE_MAX_CONN_INTERVAL, sizeof(uint16_t), &desired_max_interval);
+
+        // Connection parameters removed - not used in broadcaster mode
     }
 
     {
@@ -230,48 +231,48 @@ void Peripheral_Init()
         GAP_SetParamValue(TGAP_ADV_SCAN_REQ_NOTIFY, ENABLE);
     }
 
-    // Setup the GAP Bond Manager
-    {
-        uint32_t passkey = 0; // passkey "000000"
-        uint8_t  pairMode = GAPBOND_PAIRING_MODE_WAIT_FOR_REQ;
-        uint8_t  mitm = TRUE;
-        uint8_t  bonding = TRUE;
-        uint8_t  ioCap = GAPBOND_IO_CAP_DISPLAY_ONLY;
-        GAPBondMgr_SetParameter(GAPBOND_PERI_DEFAULT_PASSCODE, sizeof(uint32_t), &passkey);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_PAIRING_MODE, sizeof(uint8_t), &pairMode);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_MITM_PROTECTION, sizeof(uint8_t), &mitm);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_IO_CAPABILITIES, sizeof(uint8_t), &ioCap);
-        GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED, sizeof(uint8_t), &bonding);
-    }
+    // BROADCASTER MODE: Bond Manager disabled (no connections)
+    // {
+    //     uint32_t passkey = 0; // passkey "000000"
+    //     uint8_t  pairMode = GAPBOND_PAIRING_MODE_WAIT_FOR_REQ;
+    //     uint8_t  mitm = TRUE;
+    //     uint8_t  bonding = TRUE;
+    //     uint8_t  ioCap = GAPBOND_IO_CAP_DISPLAY_ONLY;
+    //     GAPBondMgr_SetParameter(GAPBOND_PERI_DEFAULT_PASSCODE, sizeof(uint32_t), &passkey);
+    //     GAPBondMgr_SetParameter(GAPBOND_PERI_PAIRING_MODE, sizeof(uint8_t), &pairMode);
+    //     GAPBondMgr_SetParameter(GAPBOND_PERI_MITM_PROTECTION, sizeof(uint8_t), &mitm);
+    //     GAPBondMgr_SetParameter(GAPBOND_PERI_IO_CAPABILITIES, sizeof(uint8_t), &ioCap);
+    //     GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED, sizeof(uint8_t), &bonding);
+    // }
 
-    // Initialize GATT attributes
-    GGS_AddService(GATT_ALL_SERVICES);           // GAP
-    GATTServApp_AddService(GATT_ALL_SERVICES);   // GATT attributes
-    SimpleProfile_AddService(GATT_ALL_SERVICES); // Simple GATT Profile
+    // BROADCASTER MODE: GATT services disabled (not accessible without connection)
+    // GGS_AddService(GATT_ALL_SERVICES);           // GAP
+    // GATTServApp_AddService(GATT_ALL_SERVICES);   // GATT attributes
+    // SimpleProfile_AddService(GATT_ALL_SERVICES); // Simple GATT Profile
 
-    // Set the GAP Characteristics
-    GGS_SetParameter(GGS_DEVICE_NAME_ATT, GAP_DEVICE_NAME_LEN, attDeviceName);
+    // BROADCASTER MODE: GAP Characteristics disabled
+    // GGS_SetParameter(GGS_DEVICE_NAME_ATT, GAP_DEVICE_NAME_LEN, attDeviceName);
 
-    // Setup the SimpleProfile Characteristic Values
-    {
-        uint8_t charValue1[SIMPLEPROFILE_CHAR1_LEN] = {1};
-        uint8_t charValue2[SIMPLEPROFILE_CHAR2_LEN] = {2};
-        uint8_t charValue3[SIMPLEPROFILE_CHAR3_LEN] = {3};
-        uint8_t charValue4[SIMPLEPROFILE_CHAR4_LEN] = {4};
-        uint8_t charValue5[SIMPLEPROFILE_CHAR5_LEN] = {1, 2, 3, 4, 5};
+    // BROADCASTER MODE: SimpleProfile disabled
+    // {
+    //     uint8_t charValue1[SIMPLEPROFILE_CHAR1_LEN] = {1};
+    //     uint8_t charValue2[SIMPLEPROFILE_CHAR2_LEN] = {2};
+    //     uint8_t charValue3[SIMPLEPROFILE_CHAR3_LEN] = {3};
+    //     uint8_t charValue4[SIMPLEPROFILE_CHAR4_LEN] = {4};
+    //     uint8_t charValue5[SIMPLEPROFILE_CHAR5_LEN] = {1, 2, 3, 4, 5};
+    //
+    //     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR1, SIMPLEPROFILE_CHAR1_LEN, charValue1);
+    //     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR2, SIMPLEPROFILE_CHAR2_LEN, charValue2);
+    //     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR3, SIMPLEPROFILE_CHAR3_LEN, charValue3);
+    //     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, SIMPLEPROFILE_CHAR4_LEN, charValue4);
+    //     SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR5, SIMPLEPROFILE_CHAR5_LEN, charValue5);
+    // }
 
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR1, SIMPLEPROFILE_CHAR1_LEN, charValue1);
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR2, SIMPLEPROFILE_CHAR2_LEN, charValue2);
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR3, SIMPLEPROFILE_CHAR3_LEN, charValue3);
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR4, SIMPLEPROFILE_CHAR4_LEN, charValue4);
-        SimpleProfile_SetParameter(SIMPLEPROFILE_CHAR5, SIMPLEPROFILE_CHAR5_LEN, charValue5);
-    }
+    // BROADCASTER MODE: Connection item init disabled
+    // peripheralInitConnItem(&peripheralConnList);
 
-    // Init Connection Item
-    peripheralInitConnItem(&peripheralConnList);
-
-    // Register callback with SimpleGATTprofile
-    SimpleProfile_RegisterAppCBs(&Peripheral_SimpleProfileCBs);
+    // BROADCASTER MODE: Profile callbacks disabled
+    // SimpleProfile_RegisterAppCBs(&Peripheral_SimpleProfileCBs);
 
     // Register receive scan request callback
     GAPRole_BroadcasterSetCB(&Broadcaster_BroadcasterCBs);
@@ -335,47 +336,51 @@ uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
         return (events ^ SBP_START_DEVICE_EVT);
     }
 
-    if(events & SBP_PERIODIC_EVT)
-    {
-        // Restart timer
-        if(SBP_PERIODIC_EVT_PERIOD)
-        {
-            tmos_start_task(Peripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
-        }
-        // Perform periodic application task
-        performPeriodicTask();
-        return (events ^ SBP_PERIODIC_EVT);
-    }
+    // BROADCASTER MODE: Periodic events disabled (no connection to send notifications)
+    // if(events & SBP_PERIODIC_EVT)
+    // {
+    //     // Restart timer
+    //     if(SBP_PERIODIC_EVT_PERIOD)
+    //     {
+    //         tmos_start_task(Peripheral_TaskID, SBP_PERIODIC_EVT, SBP_PERIODIC_EVT_PERIOD);
+    //     }
+    //     // Perform periodic application task
+    //     performPeriodicTask();
+    //     return (events ^ SBP_PERIODIC_EVT);
+    // }
 
-    if(events & SBP_PARAM_UPDATE_EVT)
-    {
-        // Send connect param update request
-        // When the current connection parameters already meet the requirements for update, return 0x18(InvalidRange)
-        GAPRole_PeripheralConnParamUpdateReq(peripheralConnList.connHandle,
-                                             DEFAULT_DESIRED_MIN_CONN_INTERVAL,
-                                             DEFAULT_DESIRED_MAX_CONN_INTERVAL,
-                                             DEFAULT_DESIRED_SLAVE_LATENCY,
-                                             DEFAULT_DESIRED_CONN_TIMEOUT,
-                                             Peripheral_TaskID);
+    // BROADCASTER MODE: Connection parameter update disabled
+    // if(events & SBP_PARAM_UPDATE_EVT)
+    // {
+    //     // Send connect param update request
+    //     // When the current connection parameters already meet the requirements for update, return 0x18(InvalidRange)
+    //     GAPRole_PeripheralConnParamUpdateReq(peripheralConnList.connHandle,
+    //                                          DEFAULT_DESIRED_MIN_CONN_INTERVAL,
+    //                                          DEFAULT_DESIRED_MAX_CONN_INTERVAL,
+    //                                          DEFAULT_DESIRED_SLAVE_LATENCY,
+    //                                          DEFAULT_DESIRED_CONN_TIMEOUT,
+    //                                          Peripheral_TaskID);
+    //
+    //     return (events ^ SBP_PARAM_UPDATE_EVT);
+    // }
 
-        return (events ^ SBP_PARAM_UPDATE_EVT);
-    }
+    // BROADCASTER MODE: PHY update disabled
+    // if(events & SBP_PHY_UPDATE_EVT)
+    // {
+    //     // start phy update
+    //     PRINT("PHY Update %x...\n", GAPRole_UpdatePHY(peripheralConnList.connHandle, 0,
+    //                 GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0));
+    //
+    //     return (events ^ SBP_PHY_UPDATE_EVT);
+    // }
 
-    if(events & SBP_PHY_UPDATE_EVT)
-    {
-        // start phy update
-        PRINT("PHY Update %x...\n", GAPRole_UpdatePHY(peripheralConnList.connHandle, 0,
-                    GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0));
-
-        return (events ^ SBP_PHY_UPDATE_EVT);
-    }
-
-    if(events & SBP_READ_RSSI_EVT)
-    {
-        GAPRole_ReadRssiCmd(peripheralConnList.connHandle);
-        tmos_start_task(Peripheral_TaskID, SBP_READ_RSSI_EVT, SBP_READ_RSSI_EVT_PERIOD);
-        return (events ^ SBP_READ_RSSI_EVT);
-    }
+    // BROADCASTER MODE: RSSI read disabled
+    // if(events & SBP_READ_RSSI_EVT)
+    // {
+    //     GAPRole_ReadRssiCmd(peripheralConnList.connHandle);
+    //     tmos_start_task(Peripheral_TaskID, SBP_READ_RSSI_EVT, SBP_READ_RSSI_EVT_PERIOD);
+    //     return (events ^ SBP_READ_RSSI_EVT);
+    // }
 
     // Discard unknown events
     return 0;
@@ -578,69 +583,35 @@ static void peripheralParamUpdateCB(uint16_t connHandle, uint16_t connInterval,
  */
 static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
 {
+    // BROADCASTER MODE: Only handle advertising states, no connection states
     switch(newState & GAPROLE_STATE_ADV_MASK)
     {
         case GAPROLE_STARTED:
-            PRINT("Initialized..\n");
+            PRINT("Broadcaster Initialized..\n");
             break;
 
         case GAPROLE_ADVERTISING:
-            if(pEvent->gap.opcode == GAP_LINK_TERMINATED_EVENT)
-            {
-                Peripheral_LinkTerminated(pEvent);
-                PRINT("Disconnected.. Reason:%x\n", pEvent->linkTerminate.reason);
-                PRINT("Advertising..\n");
-            }
-            else if(pEvent->gap.opcode == GAP_MAKE_DISCOVERABLE_DONE_EVENT)
-            {
-                PRINT("Advertising..\n");
-            }
-            break;
-
-        case GAPROLE_CONNECTED:
-            if(pEvent->gap.opcode == GAP_LINK_ESTABLISHED_EVENT)
-            {
-                Peripheral_LinkEstablished(pEvent);
-                PRINT("Connected..\n");
-            }
-            break;
-
-        case GAPROLE_CONNECTED_ADV:
             if(pEvent->gap.opcode == GAP_MAKE_DISCOVERABLE_DONE_EVENT)
             {
-                PRINT("Connected Advertising..\n");
+                PRINT("Broadcasting (Non-Connectable Advertising)..\n");
             }
             break;
 
         case GAPROLE_WAITING:
             if(pEvent->gap.opcode == GAP_END_DISCOVERABLE_DONE_EVENT)
             {
-                PRINT("Waiting for advertising..\n");
-            }
-            else if(pEvent->gap.opcode == GAP_LINK_TERMINATED_EVENT)
-            {
-                Peripheral_LinkTerminated(pEvent);
-                PRINT("Disconnected.. Reason:%x\n", pEvent->linkTerminate.reason);
-            }
-            else if(pEvent->gap.opcode == GAP_LINK_ESTABLISHED_EVENT)
-            {
-                if(pEvent->gap.hdr.status != SUCCESS)
-                {
-                    PRINT("Waiting for advertising..\n");
-                }
-                else
-                {
-                    PRINT("Error..\n");
-                }
-            }
-            else
-            {
-                PRINT("Error..%x\n", pEvent->gap.opcode);
+                PRINT("Broadcaster waiting..\n");
             }
             break;
 
         case GAPROLE_ERROR:
-            PRINT("Error..\n");
+            PRINT("Broadcaster Error..\n");
+            break;
+
+        // BROADCASTER MODE: Connection states should never occur
+        case GAPROLE_CONNECTED:
+        case GAPROLE_CONNECTED_ADV:
+            PRINT("WARNING: Connection attempted in broadcaster-only mode!\n");
             break;
 
         default:
