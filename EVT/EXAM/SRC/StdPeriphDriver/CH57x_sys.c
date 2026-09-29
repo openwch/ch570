@@ -310,8 +310,132 @@ void NMI_Handler(void)
     while(1);
 }
 
+/* 轮询一次大约需要 15~30 个 SysTick 时钟，周期比这更短就没法用SysTick计时 */ 
+#define SYS_SYSTICK_MIN_PERIOD 1000
+
 /*********************************************************************
- * @fn      mDelayuS
+ * @fn      SysTickWrapTicks
+ *
+ * @brief   计数器从起点数回起点所需的 SysTick 时钟数。
+ *          自动重装载（STRE = 1）时，计数到 CMP（向上）或 0（向下）就重新 
+ *          开始，所以一个周期是 CMP + 1 个时钟。自由运行（STRE = 0， 
+ *          或者 CMP = 0xFFFFFFFF）时数到 2^32 才回起点，这里用 0 表示； 
+ *          此时 CMP + 1 也会溢出成 0。
+ *
+ * @return  一个周期的时钟数（0 表示 2^32）
+ */
+__HIGH_CODE
+static uint32_t SysTickWrapTicks(void)
+{
+    if((SysTick->CTLR & SysTick_CTLR_STRE) == 0)
+    {
+        return 0; /* 自由运行：2^32 */
+    }
+    return SysTick->CMP + 1; /* 此时也是 2^32 */
+}
+
+/*********************************************************************
+ * @fn      SysTickCount
+ *
+ * @brief   读取计数器，并转换成一个只增不减的值，这样等待时就不用关心计数 
+ *          方向：MODE = 0 向上计数，直接用 CNTL；MODE = 1 向下计数，用 
+ *          （周期 - 1）- CNTL 把方向反过来。
+ *
+ * @return  转换后的计数值
+ */
+__HIGH_CODE
+static uint32_t SysTickCount(void)
+{
+    if(SysTick->CTLR & SysTick_CTLR_MODE) /* bit4 = 1：向下计数 */
+    {
+        return (SysTickWrapTicks() - 1) - SysTick->CNTL;
+    }
+    return SysTick->CNTL; /* bit4 = 0：向上计数 */
+}
+
+/*********************************************************************
+ * @fn      SysTickDelay
+ *
+ * @brief   等待指定数量的 SysTick 时钟。整个过程只读取 SysTick（CTLR/CMP/ 
+ *          CNTL），从不写入 CTLR/CMP/SR，所以应用自己用的 SysTick 中断、 
+ *          它的周期和标志都不会被影响。 
+ *
+ * @param   ticks   - 需要等待的 SysTick 时钟数
+ *
+ * @return  1       - 已经用 SysTick 完成延时
+ *          0       - SysTick 不能用于计时（没有启动、周期太短没法轮询、或 
+ *                   者等待过程中被关掉），调用者改用原来的空循环
+*/
+__HIGH_CODE
+static uint8_t SysTickDelay(uint64_t ticks)
+{
+    if((ticks == 0) || ((SysTick->CTLR & SysTick_CTLR_STE) == 0))
+    {
+        return 0; /* 计数器没有在跑 */
+    }
+
+    uint32_t period = SysTickWrapTicks();
+    if((period != 0) && (period < SYS_SYSTICK_MIN_PERIOD))
+    {
+        return 0; /* 周期太短，轮询来不及 */
+    }
+
+    uint32_t prev = SysTickCount();
+    uint64_t tcnt = 0;
+    while(tcnt < ticks)
+    {
+        if((SysTick->CTLR & SysTick_CTLR_STE) == 0)
+        {
+            return 0; /* 等待过程中被关掉了 */
+        }
+
+        uint32_t now = SysTickCount();
+        if(now == prev)
+        {
+            continue; /* 读数没变，继续等 */
+        }
+
+        /* 转换后的值是递增的，差值就是经过的时钟数；如果反而变小了，说明中间
+         * 计数器回过一次起点，要补上回到起点之前剩下的部分 */
+        uint32_t step = (now > prev) ? (now - prev) : (period - prev + now);
+        tcnt += step;
+        prev = now;
+    }
+    return 1;
+}
+
+/*********************************************************************
+ * @fn      SysTimeToTicks
+ *
+ * @brief   把 t（单位由 unitUs 指定）换算成延时需要等待的 SysTick 时钟数。
+ *          频率取自 GetSysClock()；STCLK = 0 表示时基为 HCLK/8。结果向上取整，
+ *          保证延时不会比要求的短。
+ *
+ * @param   t       - 时间数值
+ * @param   unitUs  - t 的一个单位等于多少微秒：t 是 us 时填 1，是 ms 时填
+ *                   1000
+ *
+ * @return  SysTick 时钟数
+ */
+__HIGH_CODE
+static uint64_t SysTimeToTicks(uint16_t t, uint32_t unitUs)
+{
+    uint32_t sys_clock = GetSysClock();
+    uint64_t ticks;
+
+    if((SysTick->CTLR & SysTick_CTLR_STCLK) == 0)
+    {
+        sys_clock >>= 3; /* STCLK = 0：时基为 HCLK/8 */
+    }
+
+    /* 向上取整，保证延时不会比要求的短 */
+    ticks = ((((uint64_t)sys_clock * t) * unitUs) + (1000000 - 1)) / 1000000;
+
+    return ticks ? ticks : 1; /* 至少延时 1 个时钟 */
+}
+
+/*********************************************************************
+ * @fn      loopDelayus
  *
  * @brief   uS 延时
  *
@@ -320,7 +444,7 @@ void NMI_Handler(void)
  * @return  none
  */
 __HIGH_CODE
-void mDelayuS(uint16_t t)
+static void loopDelayus(uint16_t t)
 {
     uint32_t i;
 #if(FREQ_SYS == 100000000)
@@ -373,6 +497,29 @@ void mDelayuS(uint16_t t)
 }
 
 /*********************************************************************
+ * @fn      mDelayuS
+ *
+ * @brief   uS 延时
+ *
+ * @param   t       - 时间参数
+ *
+ * @return  none
+ */
+__HIGH_CODE
+void mDelayuS(uint16_t t)
+{
+    if(t == 0)
+    {
+        return;
+    }
+
+    if(SysTickDelay(SysTimeToTicks(t, 1)) == 0)
+    {
+        loopDelayus(t); /* SysTick unavailable */
+    }
+}
+
+/*********************************************************************
  * @fn      mDelaymS
  *
  * @brief   mS 延时
@@ -384,10 +531,19 @@ void mDelayuS(uint16_t t)
 __HIGH_CODE
 void mDelaymS(uint16_t t)
 {
-    do
+    if(t == 0)
     {
-        mDelayuS(1000);
-    }while(--t);
+        return;
+    }
+
+    if(SysTickDelay(SysTimeToTicks(t, 1000)) == 0)
+    {
+        do
+        {
+            loopDelayus(1000); /* SysTick unavailable */
+        }
+        while(--t);
+    }
 }
 
 #ifdef DEBUG
