@@ -46,7 +46,7 @@
  
  【SNV】
  BLE_SNV                                    - 是否开启SNV功能，用于储存绑定信息( 默认:TRUE )
- BLE_SNV_ADDR                               - SNV信息保存地址，使用data flash最后512字节( 默认:0x77E00 )
+ BLE_SNV_ADDR                               - SNV信息保存地址，使用data flash最后512字节( 默认:0x3B000 )
  BLE_SNV_BLOCK                              - SNV信息保存块大小( 默认:256 )
  BLE_SNV_NUM                                - SNV信息保存数量( 默认:1 )
 

@@ -40,13 +40,14 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
-    GPIOA_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PU);
+    GPIOA_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PU);  
 
     /* 配置串口调试 */
     DebugInit();

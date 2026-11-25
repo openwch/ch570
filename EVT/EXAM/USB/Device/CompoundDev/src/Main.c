@@ -211,7 +211,7 @@ void USB_DevTransProcess(void)
             if((pSetupReqPak->bRequestType & USB_REQ_TYP_MASK) != USB_REQ_TYP_STANDARD)
             {
                 /* 非标准请求 */
-                /* 其它请求,如类请求，产商请求等 */
+                /* 其它请求,如类请求，厂商请求等 */
                 if(pSetupReqPak->bRequestType & 0x40)
                 {
                     /* 厂商请求 */
@@ -651,8 +651,9 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
+    FlashLock();
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
 

@@ -1,5 +1,5 @@
 
-Nanjing Qinheng Microelectronics Co., Ltd. 2025.07
+Nanjing Qinheng Microelectronics Co., Ltd. 2026.09
 
 http://wch-ic.com
 
@@ -11,64 +11,83 @@ Directory
   |      |      |-- EXAM: 
   |      |      |      |-- SRC  
   |      |      |      |      |-- Ld: link file
-  |      |      |      |      |-- RVMSIS: kernal system header file
+  |      |      |      |      |-- RVMSIS: kernel system header file
   |      |      |      |      |-- Startup: CH57x startup file
   |      |      |      |      |-- StdPeriphDriver: basic peripheral driver source file and header file
-  |      |      |      |-- ADC: Analog-to-Digital Conversion using PWM and CMP for sampling routines. 
-  |      |      |      |-- CMP: Voltage comparator routine
-  |      |      |      |-- FLASH: on-chip flash routines: erase/read/write Code area and DataFlash area
-  |      |      |      |-- I2C: I2C routines, master/slave mode, data transceiver
+  |      |      |      |-- ADC: analog ADC sampling routine using PWM and comparator (CMP), supports 8-bit/9-bit/4-bit sampling, refer to the PDF document in the routine directory for details
+  |      |      |      |-- CC: CrossConnect routine, a one-stop development platform for IoT developers, see https://iot.wch.cn/ach/resources/overview/ for details
+  |      |      |      |-- CMP: voltage comparator routine, compares PA7 input with the internal reference voltage, reads the comparison result in rising edge interrupt, and demonstrates comparator output triggering timer capture for pulse width measurement
+  |      |      |      |-- FLASH: on-chip flash routine: erase/read/write the 4KB page of user data area (with valid address range check), and read the chip unique ID and MAC address
+  |      |      |      |-- I2C: I2C routines, master/slave mode selected by macro, master reads/writes data from/to the slave, slave transceives by interrupt with user callbacks, refer to the PDF document in the routine directory for details
+  |      |      |      |-- ENCODER: encoder routine, timer encoder mode, PA7/PA2 quadrature input, forward/backward direction interrupt and counter value query
+  |      |      |      |-- KEYSCAN: low power key detection routine, KEYSCAN peripheral scans keys periodically, key press interrupt wakes up the system from sleep mode
   |      |      |      |-- IAP
-  |      |      |      |      |-- APP: APP program routine used with IAP 
-  |      |      |      |      |-- USB_IAP: Routine to update on-chip program via USB 
-  |      |      |      |      |-- USBHS_IAP: Routine to update on-chip program via High-speed USB 
-  |      |      |      |      |-- UART_IAP: Routines to update the on-chip program via UART 
+  |      |      |      |      |-- APP: APP program routine used with IAP, switches between IAP/APP by the DataFlash flag, and demonstrates jumping to IAP
+  |      |      |      |      |-- USB_IAP: IAP routine that receives firmware via USB and updates the on-chip program
+  |      |      |      |      |-- UART_IAP: IAP routine that receives firmware via UART and updates the on-chip program
   |      |      |      |      |-- WCHMcuIAP_WinAPP: IAP PC tools and source code
-  |      |      |      |-- PM: Syetem sleep mode and wake-up routine: GPIOA_5 as wake-up source, four power consumption levels
-  |      |      |      |-- PWMX: PWM1-5 output routine
-  |      |      |      |-- SPI: SPI routine, master/slave mode, data transceiver
-  |      |      |      |-- TMR: Timer routine  
-  |      |      |      |-- UART: UART receive/transmit routine
+  |      |      |      |-- PM: system sleep mode and wake-up routine: GPIOA_5 as wake-up source, demonstrates IDLE/Halt/Sleep/Shutdown four sleep levels in turn
+  |      |      |      |-- WDOG: system watchdog routine, demonstrates feeding in overflow interrupt and system reset triggered by stopping feeding, and prints the last reset cause
+  |      |      |      |-- IWDG: independent watchdog routine driven by the internal dedicated low-speed clock LSI, demonstrates periodic feeding and system reset triggered by stopping feeding
+  |      |      |      |-- PWMX
+  |      |      |      |      |-- PWMX_8Bit: 8-bit resolution PWM output routine, PWM1-5 output 25% duty cycle waveforms
+  |      |      |      |      |-- PWMX_16Bit: 16-bit resolution PWM output routine, PWM1-5 output different duty cycle waveforms, and demonstrates the cycle switch interrupt
+  |      |      |      |      |-- PWMX_DMA: PWM DMA output routine, updates PWM cycle and duty cycle data by DMA
+  |      |      |      |-- SPI
+  |      |      |      |      |-- SPI_8bit: 4-wire 8-bit data mode transceiver routine, supports single-byte/FIFO multi-byte/DMA mode, master/slave selected by macro
+  |      |      |      |      |-- SPI_2Wire: 2-wire 8-bit data mode (single-wire half-duplex) transceiver routine, master send/receive and slave receive/send
+  |      |      |      |-- TMR
+  |      |      |      |      |-- TMR_TimerInterrupt: timer interrupt routine, toggles PA6 LED every 100ms
+  |      |      |      |      |-- TMR_Capture: timer edge capture routine, captures 100 edge data on PA7 continuously by DMA and prints them
+  |      |      |      |      |-- TMR_ExternalCount: timer external pulse counting routine, counts input pulses on PA7, overflow interrupt every 1000 pulses
+  |      |      |      |      |-- TMR_DMAPWM: timer DMA PWM routine, DMA dynamically loads PWM data, PA7 outputs PWM waveform with gradually changed pulse width/duty cycle
+  |      |      |      |      |-- TMR_PWM: timer PWM output routine, PA7 outputs 100us period and 50% duty cycle PWM waveform
+  |      |      |      |-- UART: UART transceiver routine, sends string by polling, receives and echoes data by interrupt
   |      |      |      |-- USB
   |      |      |      |      |-- Device
-  |      |      |      |      |      |-- COM: USB simulate CDC device routines
+  |      |      |      |      |      |-- COM: USB simulate CDC device routine, enumerates as a virtual serial port for bidirectional data transceiving, macro switchable to custom CH372 device mode
   |      |      |      |      |      |-- VendorDefinedDev: simulate custom USB devices (CH372 device) routine, provide eight non-zero channels (upload + download), implement that data is first downloaded, and then the data content is reversed and uploaded
-  |      |      |      |      |      |-- CompoundDev: simulate keyboard/mouse routine, support HID class commands 
-  |      |      |      |      |      |-- HID_CompliantDev: USB simulate HID compliant device routines
+  |      |      |      |      |      |-- CompoundDev: USB simulate keyboard/mouse compound device routine, uploads keyboard and mouse reports, supports USB remote wakeup and HID class commands
+  |      |      |      |      |      |-- HID_CompliantDev: USB simulate HID compliant device routine, custom HID report, 64-byte interrupt endpoint upload/download
   |      |      |      |      |-- Host
-  |      |      |      |      |      |-- HostEnum:  simple enumeration procedure routine for USB devices
-  |      |      |      |      |      |-- HostAOA: USB host application routine, support connect to Android devices and communicate with APP
+  |      |      |      |      |      |-- HostEnum: USB host enumeration routine, enumerates HID keyboard/mouse and other devices on ROOT-HUB and the secondary ports of external HUB, and polls the interrupt endpoints for data transceiving
+  |      |      |      |      |      |-- HostAOA: USB host routine, connects to Android device and initiates AOA accessory mode, communicates with the APP
   |      |      |      |      |      |-- U_DISK: U disk file system routine
-  |      |      |      |      |      |      |-- EXAM1.C: C Programming Language exam, read/write file in bytes, including creating files, deleting files, modifying file attribute, and modifying file name  
-  |      |      |      |      |      |      |-- EXAM10.C: C Programming Language exam, including creating files, deleting files, modifying file attribute, and modifying file name  
-  |      |      |      |      |      |      |-- EXAM11.C: C Programming Language exam, enumerate files in the root directory or specified directory  
-  |      |      |      |      |      |      |-- EXAM13.C: C Programming Language exam, create files with long file name  
+  |      |      |      |      |      |      |-- EXAM1.C: C example source program, read/write file in bytes, including creating files, deleting files, modifying file attribute, and modifying file name  
+  |      |      |      |      |      |      |-- EXAM10.C: C example source program, including creating files, deleting files, modifying file attribute, and modifying file name  
+  |      |      |      |      |      |      |-- EXAM11.C: C example source program, enumerate files in the root directory or specified directory  
+  |      |      |      |      |      |      |-- EXAM13.C: C example source program, create files with long file name  
   |      |      |      |      |      |-- USB_LIB: U disk file system library file
   |      |      |      |-- RF
   |      |      |      |      |-- LIB: 2.4G protocol stack library file and header file
-  |      |      |      |      |-- Direct_Test_Mode��DTM test routine, combined with RF test tools
-  |      |      |      |      |-- RF_Basic: basic mode transmission and reception routine by 2.4G library 
-  |      |      |      |      |-- RF_Extend: extend mode transmission and reception routine by 2.4G library 
-  |      |      |      |      |-- RF_Uart: wireless serial communication routine: transmitter module
-  |      |      |      |      |-- RF_UartDongle: wireless serial communication routine: receiver module
+  |      |      |      |      |-- Direct_Test_Mode: DTM test routine, combined with RF test tools, frequency point, address and packets can be configured for testing
+  |      |      |      |      |-- RF_Basic_Rx: basic mode receive routine by 2.4G library, counts received packets and prints average signal strength RSSI
+  |      |      |      |      |-- RF_Basic_Tx: basic mode transmit routine by 2.4G library, opens the ACK receive window after transmitting, counts ACK number and RSSI
+  |      |      |      |      |-- RF_Extend_Rx: extend mode receive routine by 2.4G library
+  |      |      |      |      |-- RF_Extend_Tx: extend mode transmit routine by 2.4G library
+  |      |      |      |      |-- RF_Uart: wireless serial communication routine: transmitter module, sends serial data via 2.4G wireless
+  |      |      |      |      |-- RF_UartDongle: wireless serial communication routine: USB dongle receiver module, forwards received wireless data to the USB virtual serial port
+  |      |      |      |      |-- WCH 2.4G User Guide.PDF
   |      |      |      |-- BLE
-  |      |      |      |      |-- Peripheral: peripheral role routine, custom including five services with different  attributes, including read attribute, write attribute, notify attribute, read/write attribute, and safe and readable attribute
+  |      |      |      |      |-- Peripheral: peripheral role routine, custom including five services with different attributes, including read attribute, write attribute, notify attribute, read/write attribute, and safe and readable attribute
   |      |      |      |      |-- HID_Mouse: BLE mouse routine, simulate a mouse device, upload key value regularly after connected to the central
   |      |      |      |      |-- HID_Consumer: BLE consumer routine, simulate user control device, upload volume key down key regularly after connected to the central
-  |      |      |      |      |-- RF_PHY: non-standard wireless transceiver routines
-  |      |      |      |      |-- IoCHub-Net: BLE+IoChub Simple Light Control Switch Routine
+  |      |      |      |      |-- RF_PHY_Rx: non-standard wireless receive routine, used with RF_PHY_Tx
+  |      |      |      |      |-- RF_PHY_Tx: non-standard wireless transmit routine, used with RF_PHY_Rx
+  |      |      |      |      |-- IoCHub_NET: BLE+IoChub simple light control switch routine
   |      |      |      |      |-- BackupUpgrade_IAP: backup wireless upgrade IAP routine, detect the current code flag, judge whether to move the backup area code to the user area and run the user area code
-  |      |      |      |      |-- BackupUpgrade_JumpIAP: backup wireless upgrade jump IAP routines, placed at the start address of the code,  for jumping to the IAP program
-  |      |      |      |      |-- BackupUpgrade_OTA: backup wireless upgrade user routine, add OTA function based on peripheral slave routines, store the upgraded firmware to the backup area and jump to the IAP program to upgrade
-  |      |      |      |      |-- SpeedTest_Peripheral: Bluetooth speed measurement slave routine
-  |      |      |      |      |-- HAL: Hardware-related files shared by routines
+  |      |      |      |      |-- BackupUpgrade_JumpIAP: backup wireless upgrade jump IAP routine, placed at the start address of the code, for jumping to the IAP program
+  |      |      |      |      |-- BackupUpgrade_OTA: backup wireless upgrade user routine, add OTA function based on the peripheral slave routine, store the upgraded firmware to the backup area and jump to the IAP program to upgrade
+  |      |      |      |      |-- SpeedTest_Peripheral: Bluetooth speed measurement slave routine, continuously uploads data by notify after MTU negotiation to measure the throughput
+  |      |      |      |      |-- HAL: hardware-related files shared by routines
   |      |      |      |      |-- LIB: BLE protocol stack library file and header file
   |      |      |      |      |-- Qinheng Low Energy Bluetooth Software Development Reference Manual.pdf
   |      |      |      |      |-- WCH Bluetooth Over-the-Air Upgrade (BLE OTA).PDF
-  |      |      |-- PUB: CH572EVT evaluation board schematic and manual
+  |      |      |      |      |-- BLE Certification: Product: WCH CH57x QDID: D051556
   |      |      |-- PUB
   |      |      |      |-- SCHPCB: Reference schematic and PCB files
   |      |      |      |-- CH572 Evaluation Board Schematic (CH572SCH.pdf)
+  |      |      |      |-- CH572 Evaluation Board User Manual (CH572评估板说明书.pdf)
   |      |      |      |-- CH572 Evaluation Board Reference.pdf
   |      |      |      |-- Important Considerations for Circuit and PCB Design of Bluetooth Chip.pdf
   |

@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2020/08/06
- * Description        : FALSH读写例程
+ * Description        : FLASH读写例程
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 
@@ -14,7 +14,17 @@
 
 #define WRProt_Size    0x08  /* 代码包含大小，单位4KB */
 
-uint8_t TestBuf[1024];
+/* -------------------- Flash-ROM(Code Flash) 操作地址与长度 -------------------- */
+#define FLASH_ROM_TEST_ADDR     (20 * 1024)             /* Flash-ROM 操作起始地址 */
+#define FLASH_ROM_TEST_LEN      (128)                   /* Flash-ROM 读写/校验长度，需为4字节整数倍 */
+#define FLASH_ROM_ERASE_LEN     (4096)                  /* Flash-ROM 擦除长度 */         
+
+/* Flash-ROM 可操作范围: [FLASH_ROM_RANGE_BASE, FLASH_ROM_RANGE_END)*/
+#define FLASH_ROM_RANGE_BASE    (20 * 1024)
+#define FLASH_ROM_RANGE_END     (0x70000)      
+
+__attribute__((aligned(4))) uint8_t TestBuf[1024];
+
 
 /*********************************************************************
  * @fn      DebugInit
@@ -39,10 +49,15 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
-    uint16_t i;
     uint8_t  s;
+	uint32_t i;
+	uint32_t rom_addr      = FLASH_ROM_TEST_ADDR;
+    uint32_t rom_len       = FLASH_ROM_TEST_LEN;
+    uint32_t rom_er_len    = FLASH_ROM_ERASE_LEN;
+
+    FlashLock();
 
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
@@ -53,6 +68,7 @@ int main()
     DebugInit();
     PRINT("Start @ChipID=%02X\n", R8_CHIP_ID);
 
+    FlashUnlock();
 #if 1 // 获取唯一ID，MAC地址，读写Flash-ROM
 
     PRINT("GET_UNIQUE_ID...\n");
@@ -71,36 +87,45 @@ int main()
     }
     PRINT("\n");
 
+    /* 第一次操作前，判断 Flash-ROM 操作地址范围是否超出可操作范围 */
+    if((rom_addr < FLASH_ROM_RANGE_BASE) ||
+       ((rom_addr + rom_len) > FLASH_ROM_RANGE_END) ||
+       ((rom_addr + rom_er_len) > FLASH_ROM_RANGE_END))
+    {
+        PRINT("Flash-ROM operation out of range!\n");
+        while(1);
+    }
+
     PRINT("FLASH_READ 20k...\n");
-    FLASH_ROM_READ(20 * 1024, TestBuf, 128);
-    for(i = 0; i < 128; i++)
+    FLASH_ROM_READ(rom_addr, TestBuf, rom_len);
+    for(i = 0; i < rom_len; i++)
     {
         PRINT("%02x ", TestBuf[i]);
     }
     PRINT("\n");
 
-    s = FLASH_ROM_ERASE(20 * 1024, 4096);
+    s = FLASH_ROM_ERASE(rom_addr, rom_er_len);
     PRINT("FLASH_ROM_ERASE=%02x\n", s);
     PRINT("FLASH_READ 20k...\n");
-    FLASH_ROM_READ(20 * 1024, TestBuf, 128);
-    for(i = 0; i < 128; i++)
+    FLASH_ROM_READ(rom_addr, TestBuf, rom_len);
+    for(i = 0; i < rom_len; i++)
     {
         PRINT("%02x ", TestBuf[i]);
     }
     PRINT("\n");
 
-    for(i = 0; i < 128; i++)
+    for(i = 0; i < rom_len; i++)
     {
         TestBuf[i] = 0x70 + i;
     }
-    s = FLASH_ROM_WRITE(20 * 1024, TestBuf, 128);
+    s = FLASH_ROM_WRITE(rom_addr, TestBuf, rom_len);//Codeflash写入必须是4字节的整数倍
     PRINT("FlashWrite=%02x\n", s);
-    s = FLASH_ROM_VERIFY(20 * 1024, TestBuf, 128);
+    s = FLASH_ROM_VERIFY(rom_addr, TestBuf, rom_len);
     PRINT("FlashVerify=%02x\n", s);
 
     PRINT("FLASH_READ...\n");
-    FLASH_ROM_READ(20 * 1024, TestBuf, 128);
-    for(i = 0; i < 128; i++)
+    FLASH_ROM_READ(rom_addr, TestBuf, rom_len);
+    for(i = 0; i < rom_len; i++)
     {
         PRINT("%02x ", TestBuf[i]);
     }
@@ -109,7 +134,7 @@ int main()
 #endif
 
 #if 0 /* 修改用户配置值 */
-    s = UserOptionByteConfig(ENABLE, ENABLE, ENABLE, WRProt_Size);
+    s = UserOptionByteConfig(ENABLE, ENABLE, WRProt_Size); 
     if(s)
         PRINT("ERR\n");
     else
@@ -132,5 +157,6 @@ int main()
     }
 #endif
 
+    FlashLock();
     while(1);
 }

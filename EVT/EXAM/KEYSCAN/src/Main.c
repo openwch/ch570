@@ -13,7 +13,9 @@
 
 #include "CH57x_common.h"
 
-volatile uint8_t KeyDownflag = 1;
+volatile uint8_t KeyDownflag = 0;    /* 上报超时窗口标志: 主循环LSI计时置位 */
+volatile uint8_t KeyPressFlag = 0;   /* 按键中断标志: 中断置位, 主循环查询后打印 */
+volatile uint8_t KeyPressValue = 0;  /* 中断内捕获的键值, 供主循环打印 */
 uint32_t LSI_CurCnt, LSI_AfterCnt = 0;
 
 /*********************************************************************
@@ -27,7 +29,7 @@ void DebugInit(void)
 {
     GPIOA_SetBits(GPIO_Pin_7);
     GPIOA_ModeCfg(GPIO_Pin_7, GPIO_ModeOut_PP_5mA); // TXD-配置推挽输出，注意先让IO口输出高电平
-    UART_Remap(ENABLE, UART_TX_REMAP_PA7, UART_RX_REMAP_PA2);
+    UART_Remap(ENABLE, UART_TX_REMAP_PA7, UART_RX_REMAP_PA6);
     UART_DefInit();
 }
 
@@ -38,10 +40,9 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
-    uint16_t i;
-    uint8_t  s;
+    FlashLock();
 
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
@@ -72,19 +73,37 @@ int main()
 
     while(1)
     {
-        LSI_CurCnt = RTC_GetCycleLSI();    // RTC计数差值作按键上报超时
+        LSI_CurCnt = RTC_GetCycleLSI();    // RTC计数差值作按键上报超时，用于演示
         if(LSI_CurCnt < LSI_AfterCnt)
         {
-            if((LSI_CurCnt + RTC_MAX_COUNT) - LSI_AfterCnt > 16000)
+            if((LSI_CurCnt + RTC_MAX_COUNT) - LSI_AfterCnt > 16000)   
             {
-                KeyDownflag = 1;
+                KeyDownflag = 1;               
                 LSI_AfterCnt = LSI_CurCnt;
             }
         }
-        if(LSI_CurCnt - LSI_AfterCnt > 16000)
+        else if(LSI_CurCnt - LSI_AfterCnt > 16000)
         {
            KeyDownflag = 1;
            LSI_AfterCnt = LSI_CurCnt;
+        }
+
+        if(KeyPressFlag)                  // 按键按下键值演示
+        {
+            if(KeyDownflag)    
+            {
+                uint8_t val;
+
+                /* 临界区: 一次性取走键值并清标志, 防止与中断并发丢事件或键值错配 */
+                PFIC_DisableIRQ(KEYSCAN_IRQn);
+                val = KeyPressValue;
+                KeyPressFlag = 0;
+                PFIC_EnableIRQ(KEYSCAN_IRQn);
+
+                KeyDownflag = 0;
+                PRINT("KeyPressed\n");
+                PRINT("KEY:%x\n", val);
+            }
         }
     }
 }
@@ -93,7 +112,7 @@ int main()
 /*********************************************************************
  * @fn      KEYSCAN_IRQHandler
  *
- * @brief   KEYSCAN_IRQHandler
+ * @brief   按键按下中断服务程序: 只置标志, 不打印
  *
  * @return  none
  */
@@ -104,12 +123,8 @@ void KEYSCAN_IRQHandler( void )
     if(KeyScan_GetITFlag(RB_KEY_PRESSED_IF))  // 获取中断标志
     {
         KeyScan_ClearITFlag(RB_KEY_PRESSED_IF); // 清除中断标志
-    }
-    if( KeyDownflag )
-    {
-        PRINT("KeyPressed\n");
-        PRINT("KEY:%x\n",KeyValue);
-        KeyDownflag = 0;
+        KeyPressValue = KeyValue;               // 捕获键值
+        KeyPressFlag = 1;                       // 按键标志
     }
 }
 

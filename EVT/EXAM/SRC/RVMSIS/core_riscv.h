@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0.0
  * Date               : 2024/07/25
- * Description        : CH585 Series RISC-V Core Peripheral Access Layer Header File
+ * Description        : CH57x Series RISC-V Core Peripheral Access Layer Header File
  *********************************************************************************
  * Copyright (c) 2024 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 

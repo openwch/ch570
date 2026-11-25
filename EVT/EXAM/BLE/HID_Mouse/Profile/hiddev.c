@@ -41,7 +41,7 @@
 #define HID_HIGH_ADV_TIMEOUT              5
 #define HID_LOW_ADV_TIMEOUT               0
 
-// Heart Rate Task Events
+// Task Events
 #define START_DEVICE_EVT                  0x0001
 #define BATT_PERIODIC_EVT                 0x0002
 
@@ -119,7 +119,7 @@ static void    hidDevHighAdvertising(void);
 static void    hidDevLowAdvertising(void);
 static void    hidDevInitialAdvertising(void);
 static uint8_t hidDevBondCount(void);
-static uint8_t HidDev_sendNoti(uint16_t handle, uint8_t len, uint8_t *pData);
+static uint8_t hidDevSendNoti(uint16_t handle, uint8_t len, uint8_t *pData);
 /*********************************************************************
  * PROFILE CALLBACKS
  */
@@ -1037,7 +1037,7 @@ static uint8_t hidDevSendReport(uint8_t id, uint8_t type, uint8_t len, uint8_t *
             if(value & GATT_CLIENT_CFG_NOTIFY)
             {
                 // Send report notification
-                state = HidDev_sendNoti(pRpt->handle, len, pData);
+                state = hidDevSendNoti(pRpt->handle, len, pData);
             }
         }
     }
@@ -1055,7 +1055,7 @@ static uint8_t hidDevSendReport(uint8_t id, uint8_t type, uint8_t len, uint8_t *
  *
  * @return  Success or failure.
  */
-static uint8_t HidDev_sendNoti(uint16_t handle, uint8_t len, uint8_t *pData)
+static uint8_t hidDevSendNoti(uint16_t handle, uint8_t len, uint8_t *pData)
 {
     uint8_t              status;
     attHandleValueNoti_t noti;

@@ -22,10 +22,12 @@ __attribute__((aligned(4))) uint8_t TxBuffer[MAX_PACKET_SIZE]; // OUT, must even
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint8_t i, s, k, len, endp;
     uint16_t  loc;
+
+    FlashLock();
 
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
@@ -62,7 +64,7 @@ int main()
             s = InitRootDevice(); // 初始化USB设备
             if(s != ERR_SUCCESS)
             {
-                PRINT("EnumAllRootDev err = %02X\n", (uint16_t)s);
+                PRINT("InitRootDevice err = %02X\n", (uint16_t)s);
             }
         }
 
@@ -124,7 +126,7 @@ int main()
             endp = len ? DevOnHubPort[len - 1].GpVar[0] : ThisUsbDev.GpVar[0]; // 中断端点的地址,位7用于同步标志位
             if(endp & USB_ENDP_ADDR_MASK)
             {                                                                                                       // 端点有效
-                s = USBHostTransact(USB_PID_IN << 4 | endp & 0x7F, endp & 0x80 ? RB_UH_R_TOG | RB_UH_T_TOG : 0, 0); // CH554传输事务,获取数据,NAK不重试
+                s = USBHostTransact(USB_PID_IN << 4 | endp & 0x7F, endp & 0x80 ? RB_UH_R_TOG | RB_UH_T_TOG : 0, 0); // USB主机传输事务,获取数据,NAK不重试
                 if(s == ERR_SUCCESS)
                 {
                     endp ^= 0x80; // 同步标志翻转

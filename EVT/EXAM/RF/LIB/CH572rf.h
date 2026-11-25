@@ -1,7 +1,7 @@
 /********************************** (C) COPYRIGHT ******************************
 * File Name         : CH572rf.h
 * Author            : WCH
-* Version           : V1.10
+* Version           : V1.20
 * Date              : 2024/11/07
 * Description       : head file(ch572/ch570)
  *
@@ -34,7 +34,7 @@ typedef void (*pfnRfRoleProcess)( rfRole_States_t status, uint8_t id );
 /*********************************************************************
  * GLOBAL MACROS
  */
-#define  VER_RF_FILE            "CH57x_RF_BASIC_LIB_V1.1"
+#define  VER_RF_FILE            "CH57x_RF_BASIC_LIB_V1.2"
 extern const uint8_t VER_RF_LIB[];  // LIB version
 
 /* takes a byte out of a uint32_t : var - uint32_t,  ByteNum - byte to take out (0 - 3) */
@@ -79,17 +79,17 @@ extern const uint8_t VER_RF_LIB[];  // LIB version
 #define LL_TX_PWR_MINUS_15_DBM       0x03
 #define LL_TX_PWR_MINUS_10_DBM       0x05
 #define LL_TX_PWR_MINUS_8_DBM        0x07
-#define LL_TX_PWR_MINUS_5_DBM        0x0A
+#define LL_TX_PWR_MINUS_5_DBM        0x09
 #define LL_TX_PWR_MINUS_3_DBM        0x0C
-#define LL_TX_PWR_MINUS_1_DBM        0x10
+#define LL_TX_PWR_MINUS_1_DBM        0x0F
 #define LL_TX_PWR_0_DBM              0x12
-#define LL_TX_PWR_1_DBM              0x15
-#define LL_TX_PWR_2_DBM              0x18
+#define LL_TX_PWR_1_DBM              0x14
+#define LL_TX_PWR_2_DBM              0x17
 #define LL_TX_PWR_3_DBM              0x1B
-#define LL_TX_PWR_4_DBM              0x1F
-#define LL_TX_PWR_5_DBM              0x25
-#define LL_TX_PWR_6_DBM              0x2D
-
+#define LL_TX_PWR_4_DBM              0x20
+#define LL_TX_PWR_5_DBM              0x28
+#define LL_TX_PWR_6_DBM              0x36
+#define LL_TX_PWR_7_DBM              0x3F
 
 
 /*********************************************************************
@@ -130,7 +130,7 @@ typedef union {
         uint32_t resv2                 :10;   //6-15
         // 2.4G CONFIG
         uint32_t lengthCrc             : 2;   //16-17   00:0 bytes, 01:1 bytes, 10:2 bytes
-        uint32_t ctlFiled              : 2;   //18-19   00:no control field,  01:9 bits field, 10:10 bits field
+        uint32_t ctlField              : 2;   //18-19   00:no control field,  01:9 bits field, 10:10 bits field
         uint32_t lengthAA              : 2;   //20-21   Access length, 00:resv, 01:4 bytes, 10:5 bytes
         uint32_t lengthPreamble        : 2;   //22-23   Preamble length, 01:1 byte, 11:3 bytes
         uint32_t dplEnable             : 1;   //24      0:nondpl, 1: dpl
@@ -158,7 +158,7 @@ typedef struct
                                   //!< BIT[5:4]    MODE_PHY        2b'00-1M  01-2M  11-2.4G
                                   //!< BIT[10:8]   MODE_INDEX      2b'00:0.5  01:0.375  10:0.3125  11:0.25
                                   //!< BIT[17:16]  CRC_LEN         2b'00:0 bytes, 01:1 bytes, 10:2 bytes
-                                  //!< BIT[19:18]  CTL_FILED       2b'00:no control field,  01:9 bits field, 10:10 bits field
+                                  //!< BIT[19:18]  CTL_FIELD       2b'00:no control field,  01:9 bits field, 10:10 bits field
                                   //!< BIT[21:20]  AA_LEN          2b'00:resv, 01:4 bytes, 10:5 bytes
                                   //!< BIT[23:22]  PRE_LEN         2b'01:1 byte, 11:3 bytes
                                   //!< BIT24       DPL_EN          1b'0:nondpl, 1: dpl
@@ -169,7 +169,7 @@ typedef struct
     uint32_t txDMA;               //!< Tx DMA begin address
     uint8_t whiteChannel;         //!< whitening channel
     uint8_t txLen;                //!< 2.4G nondpl mode: The length of Tx data  other mode: resv
-    uint8_t waitTime;             //!< wait tx PLL lock time
+    uint16_t waitTime;             //!< wait tx PLL lock time
     int8_t txPowerVal;            //!< Tx power value
     uint32_t crcPoly;             //!< crc poly value
 } rfipTx_t;
@@ -185,7 +185,7 @@ typedef struct
                                   //!< bit2: 1-set the channel index of Data whitening
                                   //!< BIT[5:4]    PHY_MODE        2b'00-1M  01-2M  11-2.4G
                                   //!< BIT[17:16]  CRC length      2b'00:0 bytes, 01:1 bytes, 10:2 bytes
-                                  //!< BIT[19:18]  Control filed   2b'00:no control field,  01:9 bits field, 10:10 bits field
+                                  //!< BIT[19:18]  Control field   2b'00:no control field,  01:9 bits field, 10:10 bits field
                                   //!< BIT[21:20]  Access_code     2b'00:resv, 01:4 bytes, 10:5 bytes
                                   //!< BIT[23:22]  Preamble length 2b'01:1 byte, 11:3 bytes
                                   //!< BIT24       DPL enable      1b'0:nondpl, 1: dpl

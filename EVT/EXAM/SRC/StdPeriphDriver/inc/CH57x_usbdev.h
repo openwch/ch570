@@ -138,7 +138,7 @@ void DevEP4_IN_Deal(uint8_t l);
 /**
  * @brief   关闭USB上拉电阻
  */
-#define USB_DisablePin()  (R16_PIN_ANALOG_IE &= ~(RB_PIN_USB_IE | RB_PIN_USB_DP_PU))
+#define USB_DisablePin()  (R16_PIN_ANALOG_IE &= ~(RB_PIN_USB_EN  | RB_PIN_USB_DP_PU))
 
 /**
  * @brief   关闭USB

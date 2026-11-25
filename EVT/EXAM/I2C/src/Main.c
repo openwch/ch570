@@ -47,9 +47,11 @@ static void i2c_on_slave_receive_user(uint8_t *data, uint8_t len)
 }
 #endif
 
-int main()
+int main(void)
 {
     uint8_t i = 0;
+
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);
@@ -64,7 +66,7 @@ int main()
 #if(I2C_MODE == IIC_HOST_MODE)
     PRINT("IIC Host mode\r\n");
     I2C_Init(I2C_Mode_I2C, 400000, I2C_DutyCycle_16_9, I2C_Ack_Enable, I2C_AckAddr_7bit, MASTER_ADDR);
-    while(I2C_GetFlagStatus(I2C_FLAG_BUSY) != RESET);
+    while(I2C_GetFlagStatus(I2C_FLAG_BUSY) != RESET);     // 此处及后续等待标志处可加超时保护，防止卡死
 
     I2C_GenerateSTART(ENABLE);
 
@@ -73,7 +75,7 @@ int main()
 
     while(!I2C_CheckEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 
-    while(i < 6)
+    while(i < SIZE)
     {
         if(I2C_GetFlagStatus(I2C_FLAG_TXE) != RESET)
         {
@@ -97,7 +99,7 @@ int main()
     PRINT("read %d byte(s) from %#x (", ret, SLAVE_ADDR >> 1);
 
     if (ret >= 0) {
-        for(int i = 0; i < ret; i++) {
+        for(i = 0; i < ret; i++) {
             PRINT(" %#x", RxData[i]);
         }
     }

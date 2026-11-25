@@ -40,10 +40,10 @@ void mStopIfError(uint8_t iError)
         return; /* 操作成功 */
     }
     PRINT("Error: %02X\n", (uint16_t)iError); /* 显示错误 */
-    /* 遇到错误后,应该分析错误码以及CH554DiskStatus状态,例如调用CHRV3DiskReady查询当前U盘是否连接,如果U盘已断开那么就重新等待U盘插上再操作,
+    /* 遇到错误后,应该分析错误码以及CHRV3DiskStatus状态,例如调用CHRV3DiskReady查询当前U盘是否连接,如果U盘已断开那么就重新等待U盘插上再操作,
      建议出错后的处理步骤:
      1、调用一次CHRV3DiskReady,成功则继续操作,例如Open,Read/Write等
-     2、如果CHRV3DiskReady不成功,那么强行将从头开始操作(等待U盘连接，CH554DiskReady等) */
+     2、如果CHRV3DiskReady不成功,那么强行将从头开始操作(等待U盘连接，CHRV3DiskReady等) */
     while(1)
     {
     }
@@ -64,10 +64,12 @@ void DebugInit( void )
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint8_t  s, c, i;
     uint16_t TotalCount;
+
+    FlashLock();
 
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
@@ -168,7 +170,7 @@ int main()
 //                    mCmdParam.ByteWrite.mByteCount = 2;  //写入2个字节的数据
 //                    CHRV3ByteWrite();                    //继续在原文件的后面添加数据
 //                    mCmdParam.ByteWrite.mByteCount = 0;  //写入0个字节的数据,实际上该操作用于通知程序库更新文件长度
-//                    CHRV3ByteWrite();                    //写入0字节的数据,用于自动更新文件的长度,所以文件长度增加15,如果不这样做,那么执行CH554FileClose时也会自动更新文件长度
+//                    CHRV3ByteWrite();                    //写入0字节的数据,用于自动更新文件的长度,所以文件长度增加15,如果不这样做,那么执行CHRV3FileClose时也会自动更新文件长度
 
                     //创建文件演示
                     PRINT("Create\n");

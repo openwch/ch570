@@ -145,43 +145,217 @@ typedef enum
 #define I2C_EVENT_SLAVE_BYTE_TRANSMITTING                    ((uint32_t)0x00060080) /* TRA, BUSY and TXE flags */
 #define I2C_EVENT_SLAVE_ACK_FAILURE                          ((uint32_t)0x00000400) /* AF flag */
 
+/**
+ * @brief   Initializes the I2C peripheral according to the specified parameters.
+ *
+ * @param   I2C_Mode        - I2C mode, refer to I2C_ModeTypeDef.
+ * @param   I2C_ClockSpeed  - Clock frequency of the I2C peripheral.
+ * @param   I2C_DutyCycle   - Fast mode duty cycle.
+ * @param   I2C_Ack         - Acknowledge enable or disable.
+ * @param   I2C_AckAddr     - 7-bit or 10-bit slave address mode.
+ * @param   I2C_OwnAddress1 - Own address1.
+ */
 void I2C_Init(I2C_ModeTypeDef I2C_Mode, uint32_t I2C_ClockSpeed, I2C_DutyTypeDef I2C_DutyCycle,
               I2C_AckTypeDef I2C_Ack, I2C_AckAddrTypeDef I2C_AckAddr, uint16_t I2C_OwnAddress1);
+
+/**
+ * @brief   Enables or disables the I2C peripheral.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_Cmd(FunctionalState NewState);
+
+/**
+ * @brief   Generates the I2C START condition.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_GenerateSTART(FunctionalState NewState);
+
+/**
+ * @brief   Generates the I2C STOP condition.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_GenerateSTOP(FunctionalState NewState);
+
+/**
+ * @brief   Enables or disables the acknowledgement.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_AcknowledgeConfig(FunctionalState NewState);
+
+/**
+ * @brief   Configures the I2C own address2.
+ *
+ * @param   Address - Own address2 value.
+ */
 void I2C_OwnAddress2Config(uint8_t Address);
+
+/**
+ * @brief   Enables or disables the dual address mode.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_DualAddressCmd(FunctionalState NewState);
+
+/**
+ * @brief   Enables or disables the general call mode.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_GeneralCallCmd(FunctionalState NewState);
+
+/**
+ * @brief   Enables or disables the specified I2C interrupts.
+ *
+ * @param   I2C_IT      - I2C interrupt source, refer to I2C_ITTypeDef.
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_ITConfig(I2C_ITTypeDef I2C_IT, FunctionalState NewState);
+
+/**
+ * @brief   Sends a data byte through the I2C peripheral.
+ *
+ * @param   Data    - Byte to be transmitted.
+ */
 void I2C_SendData(uint8_t Data);
 
+/**
+ * @brief   Returns the most recent received data.
+ *
+ * @return  The received data byte.
+ */
 uint8_t I2C_ReceiveData(void);
 
+/**
+ * @brief   Transmits the address byte to select the slave device.
+ *
+ * @param   Address         - Slave address.
+ * @param   I2C_Direction   - Transmitter or receiver mode.
+ */
 void I2C_Send7bitAddress(uint8_t Address, uint8_t I2C_Direction);
+
+/**
+ * @brief   Enables or disables the software reset.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_SoftwareResetCmd(FunctionalState NewState);
+
+/**
+ * @brief   Selects the specified I2C NACK position.
+ *
+ * @param   I2C_NACKPosition    - NACK position, refer to I2C_NACKPositionTypeDef.
+ */
 void I2C_NACKPositionConfig(uint16_t I2C_NACKPosition);
+
+/**
+ * @brief   Drives the SMBusAlert pin high or low.
+ *
+ * @param   I2C_SMBusAlert  - SMBusAlert value.
+ */
 void I2C_SMBusAlertConfig(uint16_t I2C_SMBusAlert);
+
+/**
+ * @brief   Enables or disables the PEC value transmission.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_TransmitPEC(FunctionalState NewState);
+
+/**
+ * @brief   Selects the specified I2C PEC position.
+ *
+ * @param   I2C_PECPosition - PEC position.
+ */
 void I2C_PECPositionConfig(uint16_t I2C_PECPosition);
+
+/**
+ * @brief   Enables or disables the PEC value calculation.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_CalculatePEC(FunctionalState NewState);
 
+/**
+ * @brief   Returns the PEC value.
+ *
+ * @return  The PEC value.
+ */
 uint8_t I2C_GetPEC(void);
 
+/**
+ * @brief   Enables or disables the ARP.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_ARPCmd(FunctionalState NewState);
+
+/**
+ * @brief   Enables or disables the clock stretching.
+ *
+ * @param   NewState    - ENABLE or DISABLE.
+ */
 void I2C_StretchClockCmd(FunctionalState NewState);
+
+/**
+ * @brief   Selects the I2C fast mode duty cycle.
+ *
+ * @param   I2C_DutyCycle   - Fast mode duty cycle.
+ */
 void I2C_FastModeDutyCycleConfig(uint16_t I2C_DutyCycle);
 
 /****************************************************************************************
  *                         I2C State Monitoring Functions
  ****************************************************************************************/
+/**
+ * @brief   Checks whether the last I2C event is equal to the given one.
+ *
+ * @param   I2C_EVENT   - Event to be checked, refer to I2C_EVENT_* definition.
+ *
+ * @return  0-ERROR, 1-SUCCESS.
+ */
 uint8_t    I2C_CheckEvent(uint32_t I2C_EVENT);
+
+/**
+ * @brief   Returns the last I2C event.
+ *
+ * @return  The last event value.
+ */
 uint32_t   I2C_GetLastEvent(void);
+
+/**
+ * @brief   Checks whether the specified I2C flag is set.
+ *
+ * @param   I2C_FLAG    - Flag to check.
+ *
+ * @return  FlagStatus.
+ */
 FlagStatus I2C_GetFlagStatus(uint32_t I2C_FLAG);
 
+/**
+ * @brief   Clears the specified I2C flag.
+ *
+ * @param   I2C_FLAG    - Flag to clear.
+ */
 void     I2C_ClearFlag(uint32_t I2C_FLAG);
+
+/**
+ * @brief   Checks whether the specified I2C interrupt has occurred.
+ *
+ * @param   I2C_IT      - Interrupt source to check.
+ *
+ * @return  ITStatus.
+ */
 ITStatus I2C_GetITStatus(uint32_t I2C_IT);
+
+/**
+ * @brief   Clears the specified I2C interrupt pending bit.
+ *
+ * @param   I2C_IT      - Interrupt source to clear.
+ */
 void     I2C_ClearITPendingBit(uint32_t I2C_IT);
 
 #ifdef __cplusplus

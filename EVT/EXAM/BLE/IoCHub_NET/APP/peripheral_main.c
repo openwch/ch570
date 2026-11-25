@@ -1,7 +1,7 @@
 /********************************** (C) COPYRIGHT *******************************
  * File Name          : main.c
  * Author             : WCH
- * Version            : V1.1
+ * Version            : V1.1c
  * Date               : 2020/08/06
  * Description        : 外设从机应用主函数及任务系统初始化
  *********************************************************************************
@@ -27,7 +27,7 @@ const uint8_t MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
 
 volatile uint8_t switch_sta = FALSE;
-uint8_t  key_flag = 0;
+// uint8_t  key_flag = 0;
 /*********************************************************************
  * @fn      Main_Circulation
  *
@@ -54,6 +54,7 @@ void Main_Circulation()
  */
 int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
 #if(defined(DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
@@ -74,13 +75,13 @@ int main(void)
     PRINT("%s\n", VER_LIB);
     CH57x_BLEInit();
     HAL_Init();
+    GAPRole_PeripheralInit();
+    Peripheral_Init();
     GPIOA_ModeCfg(LED_LIGHT_PIN, GPIO_ModeOut_PP_5mA);
     GPIOA_SetBits(LED_LIGHT_PIN);
     GPIOA_ModeCfg(KEY_SWITCH_PIN, GPIO_ModeIN_PU);
     GPIOA_ITModeCfg(KEY_SWITCH_PIN, GPIO_ITMode_FallEdge);
     PFIC_EnableIRQ(GPIO_A_IRQn);
-    GAPRole_PeripheralInit();
-    Peripheral_Init();
     Main_Circulation();
 }
 

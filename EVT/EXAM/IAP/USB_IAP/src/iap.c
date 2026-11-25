@@ -372,6 +372,7 @@ void myDevEP2_OUT_Deal(uint8_t l)
 				| (uint32_t) g_iap_cmd.erase.addr[3] << 24);
     	if(addr == APP_CODE_START_ADDR)
     	{
+            FlashUnlock();
 			s = FLASH_ROM_ERASE(APP_CODE_START_ADDR, APP_CODE_END_ADDR - APP_CODE_START_ADDR);
 			g_buf_write_ptr = 0;    //计数清零
 			g_flash_write_ptr = APP_CODE_START_ADDR;
@@ -408,7 +409,7 @@ void myDevEP2_OUT_Deal(uint8_t l)
 /*******************************************************************************
  * Function Name  : myDevEP2_IN_Deal
  * Description    : 端点2数据上传
- * Input          : l: 上传数据长度(<64B)
+ * Input          : s: 返回状态
  * Return         : None
  *******************************************************************************/
 __attribute__((section(".highcode")))

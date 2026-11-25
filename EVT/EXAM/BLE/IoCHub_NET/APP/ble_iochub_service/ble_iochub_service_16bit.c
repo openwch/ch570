@@ -245,7 +245,7 @@ static bStatus_t ble_iochub_ReadAttrCB(uint16_t connHandle, gattAttribute_t *pAt
 }
 
 /*********************************************************************
- * @fn      simpleProfile_WriteAttrCB
+ * @fn      ble_iochub_WriteAttrCB
  *
  * @brief   Validate attribute data prior to a write operation
  *
@@ -295,7 +295,7 @@ static bStatus_t ble_iochub_WriteAttrCB(uint16_t connHandle, gattAttribute_t *pA
             if(ble_iochub_AppCBs)
             {
                 ble_iochub_evt_t evt;
-                evt.type = BLE_IOCHUB_EVT_BLE_DATA_RECIEVED;
+                evt.type = BLE_IOCHUB_EVT_BLE_DATA_RECEIVED;
                 evt.data.length = (uint16_t)len;
                 evt.data.p_data = pValue;
                 ble_iochub_AppCBs(connHandle, &evt);
@@ -309,7 +309,7 @@ static bStatus_t ble_iochub_WriteAttrCB(uint16_t connHandle, gattAttribute_t *pA
     //        {
     //            if(ble_iochub_AppCBs) {
     //                ble_iochub_evt_t evt;
-    //                evt.type = BLE_IOCHUB_EVT_BLE_DATA_RECIEVED;
+    //                evt.type = BLE_IOCHUB_EVT_BLE_DATA_RECEIVED;
     //                evt.data.length = (uint16_t)len;
     //                evt.data.p_data = pValue;
     //                ble_iochub_AppCBs(connHandle,&evt);

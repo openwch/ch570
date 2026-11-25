@@ -40,7 +40,7 @@
 #include <stdio.h>
 #endif
 
-#ifdef  DEBUG
+#ifdef  DEBUG    
 #define PRINT(X...) printf(X)
 #else
 #define PRINT(X...)
@@ -75,17 +75,16 @@
 #include "CH57x_spi.h"
 #include "CH57x_usbdev.h"
 #include "CH57x_usbhost.h"
-#include "ISP572.h"
 
  /**
   * @brief  LSI ±÷”£®Hz£©
   */
- extern uint32_t Freq_LSI;
+ extern volatile uint32_t Freq_LSI;
 
 #define DelayMs(x)      mDelaymS(x)
 #define DelayUs(x)      mDelayuS(x)
 
-#define ROM_CFG_VERISON    0x7F010
+#define ROM_CFG_VERSION    0x7F010
 
 #ifdef __cplusplus
 }

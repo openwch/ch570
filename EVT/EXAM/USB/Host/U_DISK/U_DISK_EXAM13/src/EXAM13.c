@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : EXAM1.C
+ * File Name          : EXAM13.C
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2020/08/11
@@ -30,14 +30,14 @@ typedef struct __attribute__((packed)) _LONG_NAME
     uint8_t  LDIR_Chksum;       /*短文件名的校验和*/
     uint16_t LDIR_Name2[6];     /*长文件名的6-11个字符*/
     uint8_t  LDIR_FstClusLO[2]; /*为0*/
-    uint16_t LDIR_Name3[2];     /*长文件名的12-13各自。字符*/
+    uint16_t LDIR_Name3[2];     /*长文件名的12-13个字符*/
 
 } F_LONG_NAME; /*定义长文件名*/
 
 typedef F_LONG_NAME *P_LONG_NAME;
 
 #define MAX_LONG_NAME        4
-#define FILE_LONG_NAME       MAX_LONG_NAME * 13 + 1
+#define FILE_LONG_NAME       (MAX_LONG_NAME * 13 + 1)
 #define DATA_BASE_BUF_LEN    512
 
 uint8_t DATA_BASE_BUF0[DATA_BASE_BUF_LEN];
@@ -236,13 +236,13 @@ uint8_t mChkName(unsigned char *pJ)
 }
 
 /*********************************************************************
- * @fn      CreatLongName
+ * @fn      CreateLongName
  *
  * @brief   创建并打开文件的长文件名，在短文件名空间输入路径以及参考短文件名，在长文件名空间输入该文件长文件名的UNICODE代码
  *
  * @return  返回00表示成功，并且在短文件名空间返回真实的短文件名，其他为不成功状态
  */
-uint8_t CreatLongName()
+uint8_t CreateLongName(void)
 {
     uint8_t         ParData[MAX_PATH_LEN]; /**/
     uint16_t        tempSec;               /*扇区偏移*/
@@ -622,9 +622,11 @@ XBB:
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint8_t s, i;
+
+    FlashLock();
 
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
@@ -702,7 +704,7 @@ int main()
                     LongFileName[16] = 0X0076;
                     LongFileName[17] = 0X0000;
 
-                    s = CreatLongName(); /*创建长文件名*/
+                    s = CreateLongName(); /*创建长文件名*/
                     if(s != ERR_SUCCESS)
                         PRINT("Error: %02x\n", s);
                     else

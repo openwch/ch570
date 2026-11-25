@@ -17,28 +17,11 @@ SECTIONS
 		_einit = .;
 	} >FLASH AT>FLASH
 	
- /*   .vector :
-    {
-        *(.vector);
-    } >FLASH AT>FLASH */
-        
     .highcode_initlalign :  
     {       
         . = ALIGN(4);
         PROVIDE(_highcode_init_lma = .); 
     } >FLASH AT>FLASH 
-    
-    .highcode_init : 
-    {
-        PROVIDE(_highcode_init_vma_start = .);
-        . = ALIGN(1024);
-        *(.vector);
-		KEEP(*(SORT_NONE(.vector_handler)))
-        *(.highcode_init);
-        *(.highcode_init.*);
-		. = ALIGN(4); 
-        PROVIDE(_highcode_init_vma_end = .);
-    } >RAM AT>FLASH
     
     .highcodelalign :  
     {       
@@ -50,6 +33,8 @@ SECTIONS
     {
         . = ALIGN(4);
         PROVIDE(_highcode_vma_start = .);
+        . = ALIGN(1024);
+        *(.vector);
         *(.highcode);
         *(.highcode.*);
 		. = ALIGN(4); 

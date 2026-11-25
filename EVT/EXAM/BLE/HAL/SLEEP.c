@@ -28,7 +28,6 @@ uint16_t LSIWakeup_MaxTime;
 uint32_t CH57x_LowPower(uint32_t time)
 {
 #if(defined(HAL_SLEEP)) && (HAL_SLEEP == TRUE)
-    volatile uint32_t i;
     uint32_t time_tign, time_sleep, time_curr;
     unsigned long irq_status;
 

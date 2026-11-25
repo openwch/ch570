@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2020/08/11
- * Description        : CH573 C语言的U盘目录文件枚举程序
+ * Description        : CH572 C语言的U盘目录文件枚举程序
  * 支持: FAT12/FAT16/FAT32
  * 注意包含 CHRV3UFI.LIB/USBHOST.C/DEBUG.C
  *********************************************************************************
@@ -53,11 +53,13 @@ void mStopIfError(uint8_t iError)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint8_t  s, i;
     uint8_t *pCodeStr;
     uint16_t j;
+
+    FlashLock();
 
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
@@ -123,7 +125,7 @@ int main()
                     }
                     else
                     {
-                        pCodeStr = (uint8_t *)"/C51/*"; //列出\C51子目录下的的文件
+                        pCodeStr = (uint8_t *)"/C51/*"; //列出\C51子目录下的文件
                     }
 
                     PRINT("List file %s\n", pCodeStr);

@@ -55,6 +55,25 @@ uint32_t Lib_Write_Flash(uint32_t addr, uint32_t num, uint32_t *pBuf)
 #endif
 
 /*******************************************************************************
+ * @fn      Lib_State_CB
+ *
+ * @brief   BLE 库状态回调
+ *
+ * @param   code - 状态码
+ * @param   status - 状态值
+ *
+ * @return  None.
+ */
+void Lib_State_CB( uint8_t code, uint32_t status )
+{
+    if(code == 0x85 && status == 0x06)
+    {
+        tmos_set_event(halTaskID, HAL_LSI_CAL_EVENT);
+    }
+
+}
+
+/*******************************************************************************
  * @fn      CH57x_BLEInit
  *
  * @brief   BLE 库初始化
@@ -73,6 +92,7 @@ void CH57x_BLEInit(void)
         while(1);
     }
 
+    FlashUnlock();
     __SysTick_Config(SysTick_LOAD_RELOAD_Msk);// 配置SysTick
 
     sys_safe_access_enable( );
@@ -99,6 +119,7 @@ void CH57x_BLEInit(void)
     cfg.SNVNum = (uint32_t)BLE_SNV_NUM;
     cfg.readFlashCB = Lib_Read_Flash;
     cfg.writeFlashCB = Lib_Write_Flash;
+    cfg.staCB = Lib_State_CB;
 #endif
     cfg.srandCB = SYS_GetSysTickCnt;
 #if(defined(HAL_SLEEP)) && (HAL_SLEEP == TRUE)
@@ -130,6 +151,19 @@ void CH57x_BLEInit(void)
         PRINT("LIB init error code: %x ...\n", i);
         while(1);
     }
+    if(cfg.TxPower > LL_TX_PWR_6_DBM)
+    {
+        sys_safe_access_enable(); 
+        R32_MISC_CTRL |= (7<<6);    // 7dB需提高RF_LDO电压
+        sys_safe_access_disable();
+    }
+    else
+    {
+        sys_safe_access_enable();
+        R32_MISC_CTRL = ((R32_MISC_CTRL &~(7<<6)) | (5<<6));  // 非7dB恢复默认值
+        sys_safe_access_disable();
+    }
+
 }
 
 /*******************************************************************************
@@ -175,17 +209,27 @@ tmosEvents HAL_ProcessEvent(tmosTaskID task_id, tmosEvents events)
     if(events & HAL_REG_INIT_EVENT)
     {
 #if(defined BLE_CALIBRATION_ENABLE) && (BLE_CALIBRATION_ENABLE == TRUE) // 校准任务，单次校准耗时小于10ms
-        uint8_t state;
-        bleClockConfig_t conf;
+
 
         BLE_RegInit();                                                  // 校准RF，会关闭RF并改变RF相关寄存器，如果使用了RF收发函数需注意校准后再重新启用
-        lsiFrq = RTC_InitClock( Count_1024 );
-        conf = BLE_ClockConfig(lsiFrq);
-        state = TMOS_TimerSet(&conf);
-        LSIWakeup_MaxTime = GET_WakeUpLSIMaxTime();
+
         tmos_start_task(halTaskID, HAL_REG_INIT_EVENT, MS1_TO_SYSTEM_TIME(BLE_CALIBRATION_PERIOD));
         return events ^ HAL_REG_INIT_EVENT;
 #endif
+    }
+    if(events & HAL_LSI_CAL_EVENT)
+    {
+        uint32_t freq;
+        uint8_t state;
+        bleClockConfig_t conf;
+
+		// Count_64挡位校准约2ms, Count_128挡位则约4ms, 挡位越高校准精度越高,
+        freq = RTC_InitClock( Count_64 );
+        lsiFrq = (lsiFrq + freq) / 2;
+        conf = BLE_ClockConfig(lsiFrq);
+        state = TMOS_TimerSet(&conf);
+        LSIWakeup_MaxTime = GET_WakeUpLSIMaxTime();
+        return events ^ HAL_LSI_CAL_EVENT;
     }
     if(events & HAL_TEST_EVENT)
     {

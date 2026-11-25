@@ -29,12 +29,12 @@ uint32_t gRfTxCount;
 uint32_t gIntervalTimer;
 uint16_t gServerData; // 需要掉电保存，需保存至flash
 uint16_t gTimeoutMax;
-uint16_t gTimeout;
+volatile uint16_t gTimeout;
 
-uint8_t gDataSeq;
-uint8_t gRfStatus;
-uint8_t gBoundStatus;
-uint8_t gRxDataStatus;
+volatile uint8_t gDataSeq;
+volatile uint8_t gRfStatus;
+volatile uint8_t gBoundStatus;
+volatile uint8_t gRxDataStatus;
 
 static void rfProcessRx( rfPackage_t *pPkt );
 static void rfProcessTx( void );
@@ -289,7 +289,7 @@ static void rfProcessRx( rfPackage_t *pPkt )
         else if( pPkt->type == PKT_DATA_FLAG )
         {
             gRfStatus = RF_STATUS_TX;
-            if( pPkt->seq == gDataSeq )
+            if( pPkt->seq == gDataSeq && pPkt->length >= PKT_DATA_OFFSET ) /* 长度字段无下界校验会下溢出超大长度 */
             {
                 typeBufSize len = pPkt->length;
                 len -= PKT_DATA_OFFSET;

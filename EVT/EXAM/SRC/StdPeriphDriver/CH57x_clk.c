@@ -15,7 +15,7 @@
 /**
  * @brief  LSI ±÷”£®Hz£©
  */
-uint32_t Freq_LSI = 0;
+volatile uint32_t Freq_LSI = 0;
 
 /*********************************************************************
  * @fn      LClk_Cfg
@@ -102,6 +102,7 @@ uint32_t RTC_InitClock(RTC_OSCCntTypeDef cnt)
     uint32_t last_ov_cnt = 0;
     uint32_t new_ov_cnt = 0;
     uint32_t ov_cnt_ov_cnt = 0;
+    uint32_t irqv;
 
     if(cnt<Count_32)
     {
@@ -119,12 +120,14 @@ uint32_t RTC_InitClock(RTC_OSCCntTypeDef cnt)
     {
         cyc = 2047;
     }
-    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR | RB_OSC_CAL_IF;
+    SYS_DisableAllIrq(&irqv);
     sys_safe_access_enable();
     R8_OSC_CAL_CTRL |= RB_CNT_CLR;
     R8_OSC_CAL_CTRL = cnt;
+    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR | RB_OSC_CAL_IF;
     R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
     sys_safe_access_disable();
+    
     while(!(R16_OSC_CAL_CNT&RB_OSC_CAL_IF))
     {
         new_ov_cnt = R8_OSC_CAL_OV_CNT;
@@ -135,6 +138,7 @@ uint32_t RTC_InitClock(RTC_OSCCntTypeDef cnt)
         last_ov_cnt = new_ov_cnt;
     }
     count = ((uint32_t)R16_OSC_CAL_CNT&RB_OSC_CAL_CNT) + ((uint32_t)R8_OSC_CAL_OV_CNT+ov_cnt_ov_cnt*256)*16384;
+    SYS_RecoverIrq(irqv);
     Freq_LSI = GetSysClock()/(count/cyc);
     return Freq_LSI;
 }

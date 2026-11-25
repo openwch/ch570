@@ -132,24 +132,6 @@ extern bStatus_t Batt_GetParameter(uint8_t param, void *value);
 extern bStatus_t Batt_MeasLevel(void);
 
 /*********************************************************************
- * @fn      Batt_Setup
- *
- * @brief   Set up which ADC source is to be used. Defaults to VDD/3.
- *
- * @param   adc_ch - ADC Channel, e.g. HAL_ADC_CHN_AIN6
- * @param   minVal - max battery level
- * @param   maxVal - min battery level
- * @param   sCB - HW setup callback
- * @param   tCB - HW tear down callback
- * @param   cCB - percentage calculation callback
- *
- * @return  none.
- */
-extern void Batt_Setup(uint8_t adc_ch, uint16_t minVal, uint16_t maxVal,
-                       battServiceSetupCB_t sCB, battServiceTeardownCB_t tCB,
-                       battServiceCalcCB_t cCB);
-
-/*********************************************************************
  * @fn          Batt_HandleConnStatusCB
  *
  * @brief       Battery Service link status change handler function.

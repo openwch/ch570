@@ -100,7 +100,7 @@ extern uint32_t g_tcnt;
 
 extern void my_memcpy(void *dst, const void *src, uint32_t l);
 
-extern void Main_Circulation();
+extern void Main_Circulation(void);
 
 #define IAP_DATA_SOP1     0xaa
 #define IAP_DATA_SOP2     0x55
@@ -116,7 +116,7 @@ typedef enum
     IAP_ERR_ADDR,/* 擦除时，地址不对 */
     IAP_ERR_ERASE_FAIL,/* 擦除失败 */
     IAP_ERR_PROG_NO_ERASE,/* 没有先擦除，再写入 */
-    IAP_ERR_WRITE_FAIL,/* 没有写入失败 */
+    IAP_ERR_WRITE_FAIL,/* 写入失败 */
     IAP_ERR_VERIFY,/* 校验失败 */
 } IAP_ERR_t;
 

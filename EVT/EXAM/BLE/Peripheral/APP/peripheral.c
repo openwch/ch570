@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : peripheral.C
+ * File Name          : peripheral.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
- * Description        : 外设从机多连接应用程序，初始化广播连接参数，然后广播，连接主机后，
+ * Description        : 外设从机单连接应用程序，初始化广播连接参数，然后广播，连接主机后，
  *                      请求更新连接参数，通过自定义服务传输数据
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -106,9 +106,9 @@ static uint8_t scanRspData[] = {
     // connection interval range
     0x05, // length of this data
     GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), // 100ms
+    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL),
-    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), // 1s
+    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
 
     // Tx power level
@@ -194,14 +194,14 @@ static simpleProfileCBs_t Peripheral_SimpleProfileCBs = {
  *          This is called during initialization and should contain
  *          any application specific initialization (ie. hardware
  *          initialization/setup, table initialization, power up
- *          notificaiton ... ).
+ *          notification ... ).
  *
  * @param   task_id - the ID assigned by TMOS.  This ID should be
  *                    used to send messages and set timers.
  *
  * @return  none
  */
-void Peripheral_Init()
+void Peripheral_Init(void)
 {
     Peripheral_TaskID = TMOS_ProcessEventRegister(Peripheral_ProcessEvent);
 
@@ -312,8 +312,6 @@ static void peripheralInitConnItem(peripheralConnItem_t *peripheralConnList)
  */
 uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
 {
-    //  VOID task_id; // TMOS required parameter that isn't used in this function
-
     if(events & SYS_EVENT_MSG)
     {
         uint8_t *pMsg;
@@ -364,8 +362,9 @@ uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
     if(events & SBP_PHY_UPDATE_EVT)
     {
         // start phy update
-        PRINT("PHY Update %x...\n", GAPRole_UpdatePHY(peripheralConnList.connHandle, 0,
-                    GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0));
+        uint8_t phyStatus = GAPRole_UpdatePHY(peripheralConnList.connHandle, 0,
+                                            GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0);
+        PRINT("PHY Update %x...\n", phyStatus);
 
         return (events ^ SBP_PHY_UPDATE_EVT);
     }
@@ -439,8 +438,8 @@ static void Peripheral_ProcessTMOSMsg(tmos_event_hdr_t *pMsg)
             pMsgEvent = (gattMsgEvent_t *)pMsg;
             if(pMsgEvent->method == ATT_MTU_UPDATED_EVENT)
             {
-                peripheralMTU = pMsgEvent->msg.exchangeMTUReq.clientRxMTU;
-                PRINT("mtu exchange: %d\n", pMsgEvent->msg.exchangeMTUReq.clientRxMTU);
+                peripheralMTU = pMsgEvent->msg.mtuEvt.MTU;
+                PRINT("mtu exchange: %d\n", pMsgEvent->msg.mtuEvt.MTU);
             }
             break;
         }
@@ -481,6 +480,8 @@ static void Peripheral_LinkEstablished(gapRoleEvent_t *pEvent)
 
         // Set timer for param update event
         tmos_start_task(Peripheral_TaskID, SBP_PARAM_UPDATE_EVT, SBP_PARAM_UPDATE_DELAY);
+
+        // tmos_start_task(Peripheral_TaskID, SBP_PHY_UPDATE_EVT, SBP_PHY_UPDATE_DELAY);
 
         // Start read rssi
         tmos_start_task(Peripheral_TaskID, SBP_READ_RSSI_EVT, SBP_READ_RSSI_EVT_PERIOD);
@@ -581,8 +582,13 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
     switch(newState & GAPROLE_STATE_ADV_MASK)
     {
         case GAPROLE_STARTED:
+        {
+            uint8_t ownAddr[6];
+            GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
+            GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
             PRINT("Initialized..\n");
             break;
+        }
 
         case GAPROLE_ADVERTISING:
             if(pEvent->gap.opcode == GAP_LINK_TERMINATED_EVENT)
@@ -652,7 +658,7 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
  * @fn      performPeriodicTask
  *
  * @brief   Perform a periodic application task. This function gets
- *          called every five seconds as a result of the SBP_PERIODIC_EVT
+ *          called every 1 seconds as a result of the SBP_PERIODIC_EVT
  *          TMOS event. In this example, the value of the third
  *          characteristic in the SimpleGATTProfile service is retrieved
  *          from the profile, and then copied into the value of the
@@ -664,7 +670,7 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
  */
 static void performPeriodicTask(void)
 {
-    uint8_t notiData[SIMPLEPROFILE_CHAR4_LEN] = {0x88};
+    uint8_t notiData[SIMPLEPROFILE_CHAR4_LEN] = {0x88}; // 演示填充数据
     peripheralChar4Notify(notiData, SIMPLEPROFILE_CHAR4_LEN);
 }
 
@@ -720,14 +726,6 @@ static void simpleProfileChangeCB(uint8_t paramID, uint8_t *pValue, uint16_t len
             PRINT("profile ChangeCB CHAR1.. \n");
             break;
         }
-
-//        case SIMPLEPROFILE_CHAR3:
-//        {
-//            uint8_t newValue[SIMPLEPROFILE_CHAR3_LEN];
-//            tmos_memcpy(newValue, pValue, len);
-//            PRINT("profile ChangeCB CHAR3..\n");
-//            break;
-//        }
 
         default:
             // should not reach here!

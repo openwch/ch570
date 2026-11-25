@@ -59,10 +59,12 @@ uint8_t TouchStartAOA(void); // 尝试启动AOA模式
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint8_t s;
     uint8_t touchaoatm = 0;
+
+    FlashLock();
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
     DelayMs(5);
@@ -115,7 +117,7 @@ int main()
                         continue;      //其实这里可以不用跳转，AOA协议规定，设备会自动重新接入总线。
                     }
                     //执行到这，说明可能不支持AOA，或是其他设备
-                    PRINT("UNKOWN Device\n");
+                    PRINT("UNKNOWN Device\n");
                     SetUsbSpeed(1);
                     while(1);
                 }

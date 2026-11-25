@@ -34,27 +34,27 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-// Simple GATT Profile Service UUID: 0xFFF0
+// Simple GATT Profile Service UUID: 0xFFE0
 const uint8_t simpleProfileServUUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_SERV_UUID), HI_UINT16(SIMPLEPROFILE_SERV_UUID)};
 
-// Characteristic 1 UUID: 0xFFF1
+// Characteristic 1 UUID: 0xFFE1
 const uint8_t simpleProfilechar1UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR1_UUID), HI_UINT16(SIMPLEPROFILE_CHAR1_UUID)};
 
-// Characteristic 2 UUID: 0xFFF2
+// Characteristic 2 UUID: 0xFFE2
 const uint8_t simpleProfilechar2UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR2_UUID), HI_UINT16(SIMPLEPROFILE_CHAR2_UUID)};
 
-// Characteristic 3 UUID: 0xFFF3
+// Characteristic 3 UUID: 0xFFE3
 const uint8_t simpleProfilechar3UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR3_UUID), HI_UINT16(SIMPLEPROFILE_CHAR3_UUID)};
 
-// Characteristic 4 UUID: 0xFFF4
+// Characteristic 4 UUID: 0xFFE4
 const uint8_t simpleProfilechar4UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR4_UUID), HI_UINT16(SIMPLEPROFILE_CHAR4_UUID)};
 
-// Characteristic 5 UUID: 0xFFF5
+// Characteristic 5 UUID: 0xFFE5
 const uint8_t simpleProfilechar5UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR5_UUID), HI_UINT16(SIMPLEPROFILE_CHAR5_UUID)};
 

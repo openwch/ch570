@@ -87,7 +87,7 @@ bleClockConfig_t BLE_ClockConfig(uint32_t lsifreq)
 {
     bleClockConfig_t conf;
 
-    conf.ClockAccuracy = 2500;
+    conf.ClockAccuracy = 3000;
     conf.ClockFrequency = lsifreq;
     conf.ClockMaxCount = RTC_MAX_COUNT;
     conf.getClockValue = SYS_GetClockValue;
@@ -113,7 +113,7 @@ void HAL_TimeInit(void)
   R8_LSI_CONFIG |= RB_CLK_LSI_PON;
   sys_safe_access_disable();
 
-  lsiFrq = RTC_InitClock( Count_1024 );
+  lsiFrq = RTC_InitClock( Count_2047 );
 
   PRINT("lsiFrq = %d\n",lsiFrq);
 

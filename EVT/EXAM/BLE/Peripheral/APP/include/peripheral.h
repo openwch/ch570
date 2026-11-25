@@ -33,7 +33,7 @@ extern "C" {
 #define SBP_PHY_UPDATE_EVT      0x0010
 
 /*********************************************************************
- * MACROS
+ * TYPEDEFS
  */
 typedef struct
 {

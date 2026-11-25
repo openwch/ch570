@@ -63,7 +63,7 @@ uint8_t AnalyzeHidIntEndp(uint8_t *buf, uint8_t HubPortIndex)
             {
                 ThisUsbDev.GpVar[s] = ((PUSB_ENDP_DESCR)(buf + i))->bEndpointAddress & USB_ENDP_ADDR_MASK; // 中断端点的地址，可以根据需要保存wMaxPacketSize和bInterval
             }
-            PRINT("%02x ", (uint16_t)ThisUsbDev.GpVar[s]);
+             PRINT("%02x ", (uint16_t)(HubPortIndex ? DevOnHubPort[HubPortIndex - 1].GpVar[s] : ThisUsbDev.GpVar[s])); 
             s++;
             if(s >= 4)
             {
@@ -71,7 +71,7 @@ uint8_t AnalyzeHidIntEndp(uint8_t *buf, uint8_t HubPortIndex)
             }
         }
         l = ((PUSB_ENDP_DESCR)(buf + i))->bLength; // 当前描述符长度,跳过
-        if(l > 16)
+        if(l == 0 || l > 16)
         {
             break;
         }
@@ -104,10 +104,11 @@ uint8_t AnalyzeBulkEndp(uint8_t *buf, uint8_t HubPortIndex)
         memset(ThisUsbDev.GpVar, 0, sizeof(ThisUsbDev.GpVar)); //清空数组
     }
 
-    for(i = 0; i < ((PUSB_CFG_DESCR)buf)->wTotalLength; i += l) // 搜索中断端点描述符,跳过配置描述符和接口描述符
+    for(i = 0; i < ((PUSB_CFG_DESCR)buf)->wTotalLength; i += l) // 搜索批量端点描述符,跳过配置描述符和接口描述符
     {
+
         if((((PUSB_ENDP_DESCR)(buf + i))->bDescriptorType == USB_DESCR_TYP_ENDP)                         // 是端点描述符
-           && ((((PUSB_ENDP_DESCR)(buf + i))->bmAttributes & USB_ENDP_TYPE_MASK) == USB_ENDP_TYPE_BULK)) // 是中断端点
+           && ((((PUSB_ENDP_DESCR)(buf + i))->bmAttributes & USB_ENDP_TYPE_MASK) == USB_ENDP_TYPE_BULK)) // 是批量端点
 
         {
             if(HubPortIndex)
@@ -143,7 +144,7 @@ uint8_t AnalyzeBulkEndp(uint8_t *buf, uint8_t HubPortIndex)
             }
         }
         l = ((PUSB_ENDP_DESCR)(buf + i))->bLength; // 当前描述符长度,跳过
-        if(l > 16)
+        if(l == 0 || l > 16)
         {
             break;
         }
@@ -516,11 +517,9 @@ uint8_t InitDevOnHub(uint8_t HubPortIndex)
  *
  * @brief   枚举指定ROOT-HUB端口上的外部HUB集线器的各个端口,检查各端口有无连接或移除事件并初始化二级USB设备
  *
- * @param   RootHubIndex    - ROOT_HUB0和ROOT_HUB1
- *
  * @return  错误码
  */
-uint8_t EnumHubPort()
+uint8_t EnumHubPort(void)
 {
     uint8_t i, s;
 
@@ -657,7 +656,7 @@ uint8_t EnumAllHubPort(void)
  */
 uint16_t SearchTypeDevice(uint8_t type)
 {
-    uint8_t RootHubIndex; //CH554只有一个USB口,RootHubIndex = 0,只需看返回值的低八位即可
+    uint8_t RootHubIndex; //CH572只有一个USB口,RootHubIndex = 0,只需看返回值的低八位即可
     uint8_t HubPortIndex;
 
     RootHubIndex = 0;

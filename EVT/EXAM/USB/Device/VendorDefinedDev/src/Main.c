@@ -225,6 +225,7 @@ void USB_DevTransProcess(void)
                             SetupReqLen = len; //实际需上传总长度
                         len = (SetupReqLen >= DevEP0SIZE) ? DevEP0SIZE : SetupReqLen;
                         memcpy(pEP0_DataBuf, pDescr, len);
+                        SetupReqLen -= len; 
                         pDescr += len;
                     }
                     break;
@@ -359,8 +360,9 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);

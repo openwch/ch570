@@ -4,7 +4,7 @@
 /* Author:   RDL14 2024.11.22   */
 /* V1.0 SpecialFunctionRegister */
 /* V1.01 Update breif and define of RAM ROM FLASH PLL  */
-/* V1.02 Update interupt define and number for keyscan and encoder  */
+/* V1.02 Update interrupt define and number for keyscan and encoder  */
 /* V1.03 Update breif and define  for PWM_DATA_REG  */
 /* V1.04 Update name and breif for RTC PWM LSI */
 
@@ -83,7 +83,7 @@ typedef void                    *PVOID;
 #ifndef PCHAR
 typedef char                    *PCHAR;
 #endif
-#ifndef PCHAR
+#ifndef PCCHAR
 typedef const char              *PCCHAR;
 #endif
 #ifndef PINT8
@@ -364,7 +364,7 @@ extern "C" {
 #define  RB_INT_LSI_TUNE     0x1FFF                    // RWA, LSI oscillator frequency tune
 #define R8_LSI_CONFIG       (*((PUINT8V)0x4000102F))   // RWA, LSI oscillator configure
 #define  RB_LSI_CLK_PIN     0x80                       // RO, LSI oscillator clock pin status
-#define  RB_CLK_LSI_PON  0x01                       // RWA, LSI oscillator power on
+#define  RB_CLK_LSI_PON     0x02                       // RWA, LSI oscillator power on
 
 /* System: real-time clock register */
 #define R32_RTC_CTRL        (*((PUINT32V)0x40001030)) // RWA, RTC control, SAM
@@ -429,9 +429,9 @@ extern "C" {
 #define  RB_CMP_EN         0x01                      // RW, enable comparators    
 #define R8_CMP_CTRL_1      (*((PUINT8V)0x40001055))  // RW, configuration for comparator1, 
 #define  RB_CMP_OUT_SEL    0x0C                      // RW, comparator output sel:11=rise edge,10=fall edge,01=low,00=high 
-#define  RB_CMP_IE         0x01                      // RW, comparator interupt enable 
+#define  RB_CMP_IE         0x01                      // RW, comparator interrupt enable 
 #define R8_CMP_CTRL_2      (*((PUINT8V)0x40001056))  // RW, configuration for comparator2, 
-#define  RB_CMP_IF         0x01                      // RW1Z, comparator interupt flag     
+#define  RB_CMP_IF         0x01                      // RW1Z, comparator interrupt flag     
 #define R8_CMP_CTRL_3      (*((PUINT8V)0x40001057))  // RW, configuration for comparator3,
 #define  RB_CMP_REAL_SIG   0x01                      // RO, comparator current real siginal 
 #define  RB_APR_OUT_CMP    0x02                      // RO, comparator current output siginal 
@@ -488,10 +488,10 @@ extern "C" {
 #define  RB_SCAN_CLK_DIV    0x00F0                   // RW, divider value of scanning clock
 #define  RB_SCAN_CNT_END    0x000E                   // RW, set the times of the same key_scan value 
 #define  RB_SCAN_START_EN   0x0001                   // RW, start key scan enable,1=enable 0=disable
-#define R8_KEY_SCAN_INT_EN (*((PUINT8V)0x40001066))  // KEY SCAN interupt enable register
-#define  RB_SCAN_1END_IE    0x02                     // RW, key scan 1 round end interupt enable
-#define  RB_KEY_PRESSED_IE  0x01                     // RW, detect key pressed interupt enable                  
-#define R8_KEY_SCAN_INT_FLAG (*((PUINT8V)0x40001067))// KEY SCAN interupt flag register 
+#define R8_KEY_SCAN_INT_EN (*((PUINT8V)0x40001066))  // KEY SCAN interrupt enable register
+#define  RB_SCAN_1END_IE    0x02                     // RW, key scan 1 round end interrupt enable
+#define  RB_KEY_PRESSED_IE  0x01                     // RW, detect key pressed interrupt enable                  
+#define R8_KEY_SCAN_INT_FLAG (*((PUINT8V)0x40001067))// KEY SCAN interrupt flag register 
 #define  RB_SCAN_1END_IF    0x02                     // RW1, key scan 1 round end flag enable
 #define  RB_KEY_PRESSED_IF  0x01                     // RW1, detect key pressed flag enable                   
 #define R32_KEY_SCAN_NUMB  (*((PUINT32V)0x40001068))// SCAN_KEY number address now register
@@ -623,12 +623,12 @@ extern "C" {
 #define  RB_RD_CLR_EN       0x08                      // RW, clear encoder count value after R32_ENC_REG_CCNT be read
 #define  RB_SMS_MODE        0x06                      // RW, SMS mode value,10=T1EDGE,01=T2EDGE,11=T12EDGE
 #define  RB_START_ENC_EN    0x01                      // RW, start encode enable   
-#define R8_ENC_INTER_EN        (*((PUINT8V)0x40002421))  // RW, ENCODER interupt enable register
-#define  RB_IE_DIR_DEC      0x02                      // RW, encode decrease interupt enable
-#define  RB_IE_DIR_INC      0x01                      // RW, encode increase interupt enable 
-#define R8_ENC_INT_FLAG        (*((PUINT8V)0x40002422))  // RW, ENCODER interupt flag register
-#define  RB_IF_DIR_DEC      0x02                      // RWA, encode decrease interupt flag
-#define  RB_IF_DIR_INC      0x01                      // RWA, encode increase interupt flag 
+#define R8_ENC_INTER_EN        (*((PUINT8V)0x40002421))  // RW, ENCODER interrupt enable register
+#define  RB_IE_DIR_DEC      0x02                      // RW, encode decrease interrupt enable
+#define  RB_IE_DIR_INC      0x01                      // RW, encode increase interrupt enable 
+#define R8_ENC_INT_FLAG        (*((PUINT8V)0x40002422))  // RW, ENCODER interrupt flag register
+#define  RB_IF_DIR_DEC      0x02                      // RWA, encode decrease interrupt flag
+#define  RB_IF_DIR_INC      0x01                      // RWA, encode increase interrupt flag 
 #define R32_ENC_REG_CEND    (*((PUINT32V)0x40002424))
 #define R32_ENC_REG_CCNT    (*((PUINT32V)0x40002428))
 
@@ -803,11 +803,11 @@ extern "C" {
 #define  RB_SPI_IF_CNT_END  0x01                      // RW1, interrupt flag for SPI total byte count end
 #define SPI_FIFO_COUNT      7
 #define SPI_INTER_CFG1      8
-#define  RB_SPI_IF_FIFO_FULL   0x020000               // RW, fifo full interupt flag    
-#define  RB_SPI_IF_FIFO_EMPTY  0x010000               // RW, fifo empty interupt flag   
-#define  RB_SPI_IE_FIFO_FULL   0x0200                 // RW, fifo full interupt enable    
-#define  RB_SPI_IE_FIFO_EMPTY  0x0100                 // RW, fifo empty interupt enable  
-#define  RB_SPI_INT_TYPE       0x001F                 // RW, interupt trig mode select,1=edge,0=level  
+#define  RB_SPI_IF_FIFO_FULL   0x020000               // RW, fifo full interrupt flag    
+#define  RB_SPI_IF_FIFO_EMPTY  0x010000               // RW, fifo empty interrupt flag   
+#define  RB_SPI_IE_FIFO_FULL   0x0200                 // RW, fifo full interrupt enable    
+#define  RB_SPI_IE_FIFO_EMPTY  0x0100                 // RW, fifo empty interrupt enable  
+#define  RB_SPI_INT_TYPE       0x001F                 // RW, interrupt trig mode select,1=edge,0=level  
 #define SPI_TOTAL_CNT       0x0C
 #define SPI_FIFO            0x10
 #define SPI_DMA_NOW         0x14

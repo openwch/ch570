@@ -124,8 +124,8 @@ void ENC_Config(uint8_t s, uint32_t encReg, ENCModeTypeDef m)
     }
     else
     {
-        R8_ENC_REG_CTRL |= (m << 1) | RB_START_ENC_EN;
-        R32_ENC_REG_CEND |= encReg;
+        R8_ENC_REG_CTRL = (R8_ENC_REG_CTRL & ~(0x3 << 1)) | ((uint8_t)m << 1) | RB_START_ENC_EN; /* 模式位域先清后置 */
+        R32_ENC_REG_CEND = encReg;
     }
 }
 

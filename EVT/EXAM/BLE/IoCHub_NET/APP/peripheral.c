@@ -1,10 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : peripheral.C
+ * File Name          : peripheral.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
  * Description        : 外设从机多连接应用程序，初始化广播连接参数，然后广播，连接主机后，
- *                      请求更新连接参数，通过自定义服务传输数据
+ *                      请求更新连接参数，通过自定义服务传输数据c
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 
@@ -62,7 +62,7 @@ void on_bleiochubServiceEvt(uint16_t connection_handle, ble_iochub_evt_t *p_evt)
             PRINT("%02x:bleiochub_EVT_TX_NOTI_ENABLED\r\n", connection_handle);
             tmos_start_task(Peripheral_TaskID, IOCHUB_ALL_DP_UPLOAD_EVT, MS1_TO_SYSTEM_TIME(1000));
             break;
-        case BLE_IOCHUB_EVT_BLE_DATA_RECIEVED:
+        case BLE_IOCHUB_EVT_BLE_DATA_RECEIVED:
             PRINT("BLE RX DATA len:%d\r\n", p_evt->data.length);
 
             //for notify back test
@@ -154,7 +154,7 @@ typedef enum
 } send_to_ble_state_t;
 send_to_ble_state_t send_to_ble_state = SEND_TO_BLE_TO_SEND;
 
-blePaControlConfig_t pa_lna_ctl;
+// blePaControlConfig_t pa_lna_ctl;   /* 未被使用 */
 
 //static uint8_t Peripheral_TaskID = INVALID_TASK_ID;   // Task ID for internal task/event processing
 
@@ -167,9 +167,9 @@ static uint8_t scanRspData[] = {
     // connection interval range
     0x05, // length of this data
     GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), // 100ms
+    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL),
-    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), // 1s
+    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
     HI_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
 
     // Tx power level
@@ -209,7 +209,7 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
 
 static void peripheralParamUpdateCB(uint16_t connHandle, uint16_t connInterval,
                                     uint16_t connSlaveLatency, uint16_t connTimeout);
-static void peripheralInitConnItem(peripheralConnItem_t *peripheralConnList);
+static void peripheralInitConnItem(peripheralConnItem_t *pConnItem);
 static void peripheralRssiCB(uint16_t connHandle, int8_t rssi);
 static uint8_t ble_recv_frame(uint8_t* frame_buf, uint8_t frame_dlc);
 
@@ -327,16 +327,16 @@ void Peripheral_Init()
  *
  * @brief   Init Connection Item
  *
- * @param   peripheralConnList -
+ * @param   pConnItem -
  *
  * @return  NULL
  */
-static void peripheralInitConnItem(peripheralConnItem_t *peripheralConnList)
+static void peripheralInitConnItem(peripheralConnItem_t *pConnItem)
 {
-    peripheralConnList->connHandle = GAP_CONNHANDLE_INIT;
-    peripheralConnList->connInterval = 0;
-    peripheralConnList->connSlaveLatency = 0;
-    peripheralConnList->connTimeout = 0;
+    pConnItem->connHandle = GAP_CONNHANDLE_INIT;
+    pConnItem->connInterval = 0;
+    pConnItem->connSlaveLatency = 0;
+    pConnItem->connTimeout = 0;
 }
 
 uint32_t get_fattime(void)
@@ -557,7 +557,7 @@ uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
 
     if(events & IOCHUB_SWITCH_CHANGE_EVT)
     {
-            ble_send_frame(DP_ID_SWITCH, DP_TYPE_BOOL, (uint8_t *)(&switch_sta), 1);
+        ble_send_frame(DP_ID_SWITCH, DP_TYPE_BOOL, (uint8_t *)(&switch_sta), 1);
         return (events ^ IOCHUB_SWITCH_CHANGE_EVT);
     }
     // Discard unknown events
@@ -706,8 +706,13 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
     switch(newState & GAPROLE_STATE_ADV_MASK)
     {
         case GAPROLE_STARTED:
+        {
+            uint8_t ownAddr[6];
+            GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
+            GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
             PRINT("Initialized..\n");
             break;
+        }
 
         case GAPROLE_ADVERTISING:
             if(pEvent->gap.opcode == GAP_LINK_TERMINATED_EVENT)
@@ -844,8 +849,12 @@ uint8_t ble_send_frame(uint8_t frame_cmd, uint8_t frame_type, uint8_t* frame_buf
 
     if(frame_buf == NULL)    return 0x01;
 
-    uint16_t send_len = frame_dlc+BLE_HEAD_LEN+BLE_FOMRAT_LEN+BLE_TAIL_LEN;
+    uint16_t send_len = frame_dlc+BLE_HEAD_LEN+BLE_FORMAT_LEN+BLE_TAIL_LEN;
     send_value = (uint8_t *)tmos_msg_allocate(send_len);
+    if(send_value == NULL) /* TMOS消息池耗尽, 防空指针解引用 */
+    {
+        return 0x02;
+    }
     uint8_t *p = send_value;
     *p++ = BLE_SEND_FST;
     *p++ = BLE_SEND_SEC;

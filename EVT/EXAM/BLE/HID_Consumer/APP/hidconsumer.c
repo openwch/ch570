@@ -68,7 +68,7 @@
 #define DEFAULT_IO_CAPABILITIES              GAPBOND_IO_CAP_NO_INPUT_NO_OUTPUT
 
 // Battery level %
-#define DEFAULT_BATT_EVEL                    60
+#define DEFAULT_BATT_LEVEL                    60
 
 /*********************************************************************
  * TYPEDEFS
@@ -113,9 +113,9 @@ static uint8_t scanRspData[] = {
     // connection interval range
     0x05, // length of this data
     GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), // 100ms
+    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL),
-    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), // 1s
+    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
 
     // service UUIDs
@@ -162,7 +162,7 @@ static uint16_t hidEmuConnHandle = GAP_CONNHANDLE_INIT;
  */
 
 static void    hidEmu_ProcessTMOSMsg(tmos_event_hdr_t *pMsg);
-static void    hidEmuSendConsumerReport(uint8_t volume_up, uint8_t volume_dowm);
+static void    hidEmuSendConsumerReport(uint8_t volume_up, uint8_t volume_down);
 static uint8_t hidEmuRptCB(uint8_t id, uint8_t type, uint16_t uuid,
                            uint8_t oper, uint16_t *pLen, uint8_t *pData);
 static void    hidEmuEvtCB(uint8_t evt);
@@ -231,7 +231,7 @@ void HidEmu_Init()
 
     // Setup Battery Characteristic Values
     {
-        uint8_t values = DEFAULT_BATT_EVEL;
+        uint8_t values = DEFAULT_BATT_LEVEL;
         Batt_SetParameter(BATT_PARAM_LEVEL, sizeof(uint8_t), &values);
     }
 
@@ -297,8 +297,9 @@ uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events)
     if(events & START_PHY_UPDATE_EVT)
     {
         // start phy update
-        PRINT("Send Phy Update %x...\n", GAPRole_UpdatePHY(hidEmuConnHandle, 0,
-                    GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0));
+        uint8_t phyStatus = GAPRole_UpdatePHY(hidEmuConnHandle, 0,
+                                      GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0);
+        PRINT("Send Phy Update %x...\n", phyStatus);
 
         return (events ^ START_PHY_UPDATE_EVT);
     }
@@ -344,16 +345,16 @@ static void hidEmu_ProcessTMOSMsg(tmos_event_hdr_t *pMsg)
  * @brief   Build and send a HID consumer report.
  *
  * @param   volume_up - consumer volume up
- *					volume_dowm - consumer volume dowm
+ *					volume_down - consumer volume down
  *
  * @return  none
  */
-static void hidEmuSendConsumerReport(uint8_t volume_up, uint8_t volume_dowm)
+static void hidEmuSendConsumerReport(uint8_t volume_up, uint8_t volume_down)
 {
     uint8_t buf[HID_CONSUMER_IN_RPT_LEN];
 
     buf[0] = volume_up;   // volume up
-    buf[1] = volume_dowm; // volume dowm
+    buf[1] = volume_down; // volume down
 
     HidDev_Report(HID_RPT_ID_CONSUMER_IN, HID_REPORT_TYPE_INPUT,
                   HID_CONSUMER_IN_RPT_LEN, buf);
@@ -373,13 +374,13 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
     switch(newState & GAPROLE_STATE_ADV_MASK)
     {
         case GAPROLE_STARTED:
-        {
-            uint8_t ownAddr[6];
-            GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
-            GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
-            PRINT("Initialized..\n");
-        }
-        break;
+            {
+                uint8_t ownAddr[6];
+                GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
+                GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
+                PRINT("Initialized..\n");
+                break;
+            }
 
         case GAPROLE_ADVERTISING:
             if(pEvent->gap.opcode == GAP_MAKE_DISCOVERABLE_DONE_EVENT)
@@ -396,6 +397,7 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
                 // get connection handle
                 hidEmuConnHandle = event->connectionHandle;
                 tmos_start_task(hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY);
+                // tmos_start_task(hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY);
                 PRINT("Connected..\n");
             }
             break;

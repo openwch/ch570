@@ -85,6 +85,7 @@ void SetSysClock(SYS_CLKTypeDef sc)
         sys_safe_access_enable();
         R8_SLP_POWER_CTRL |= 0x40;
         R8_CLK_SYS_CFG = sc;
+        R32_MISC_CTRL |= (5<<3)|(5<<6)|(3<<25);
         sys_safe_access_disable();
     }
 }
@@ -131,7 +132,7 @@ uint8_t SYS_GetInfoSta(SYS_InfoStaTypeDef i)
     }
     else
     {
-        return (R8_GLOB_CFG_INFO & (1 << i));
+        return (R8_GLOB_CFG_INFO & i); 
     }
 }
 
@@ -322,6 +323,8 @@ void NMI_Handler(void)
 __HIGH_CODE
 void mDelayuS(uint16_t t)
 {
+    if(t == 0)   return;
+
     uint32_t i;
 #if(FREQ_SYS == 100000000)
     i = t * 25;
@@ -384,6 +387,8 @@ void mDelayuS(uint16_t t)
 __HIGH_CODE
 void mDelaymS(uint16_t t)
 {
+    if(t == 0)   return;
+
     do
     {
         mDelayuS(1000);
@@ -391,6 +396,17 @@ void mDelaymS(uint16_t t)
 }
 
 #ifdef DEBUG
+/*********************************************************************
+ * @fn      _write
+ *
+ * @brief   Write data to UART, used by printf for debug output
+ *
+ * @param   fd      - file descriptor, unused
+ * @param   buf     - data buffer to send
+ * @param   size    - data length
+ *
+ * @return  data length written
+ */
 int _write(int fd, char *buf, int size)
 {
     int i;
@@ -437,3 +453,124 @@ void *__wrap_memcpy(void *dst, void *src, size_t size)
     __MCPY(dst, src, (void *)((uint32_t)src+size));
     return dst;
 }
+
+/*********************************************************************
+ * @fn      IWDG_KR_Set
+ *
+ * @brief   启动看门狗/解除读保护/喂狗/重装载计数值
+ *
+ * @param   kr     - IWDG_PR
+ *
+ * @return  none
+ */
+void IWDG_KR_Set(IWDG_KR_Key kr)
+{
+    R32_IWDG_KR = kr;
+}
+
+/*********************************************************************
+ * @fn      IWDG_PR_Set
+ *
+ * @brief   配置预分频，关闭写保护位生效
+ *
+ * @param   pr
+ *
+ * @return  none
+ */
+uint8_t IWDG_PR_Set(IWDG_32K_PR pr)
+{
+    if(IWDG_WR_Protect())   return 1;
+    else
+    {
+        R32_IWDG_CFG = (R32_IWDG_CFG & ~(0x7 << 12)) | ((uint32_t)pr << 12); 
+    }
+    return 0;
+}
+
+/*********************************************************************
+ * @fn      IWDG_RLR_Set
+ *
+ * @brief   配置计数器重装载值，关闭写保护位生效
+ *
+ * @param   rlr
+ *
+ * @return  none
+ */
+uint8_t IWDG_RLR_Set(uint16_t rlr)
+{
+    uint32_t cfg;
+
+    if(IWDG_WR_Protect())   return 1;
+    else
+    {
+        cfg = R32_IWDG_CFG;
+        cfg = (R32_IWDG_CFG & ~0xFFF) | (rlr & 0xFFF);
+        R32_IWDG_CFG = cfg;
+    }
+    return 0;
+}
+
+/*********************************************************************
+ * @fn      IWDG_FollowCoreStop
+ *
+ * @brief   独立看门狗计数跟随内核停止使能，仅在调试模式下生效
+ *
+ * @param   s       - 是否使能
+ *
+ * @return  none
+ */
+uint8_t IWDG_FollowCoreStop(FunctionalState s)
+{
+    if(IWDG_WR_Protect())   return 1;
+    else
+    {
+        if(s == DISABLE)
+        {
+            R32_IWDG_CFG &= ~(1<<29);
+        }
+        else
+        {
+            R32_IWDG_CFG |= (1<<29);
+        }
+    }
+    return 0;
+}
+
+/*********************************************************************
+ * @fn      IWDG_Enable
+ *
+ * @brief   独立看门狗使能
+ *
+ * @param   pr     - 预分频
+ *          rlr    - 计数器重装载值，最大值为0xFFF
+ *
+ * @return  none
+ */
+uint8_t IWDG_Enable(IWDG_32K_PR pr, uint16_t rlr)
+{
+    uint8_t state;
+
+    IWDG_KR_Set(KEY_UNPROTECT);
+    state = IWDG_PR_Set(pr);
+    if(state)  return 1;
+    state = IWDG_RLR_Set(rlr);
+    if(state)  return 1;
+
+    IWDG_KR_Set(KEY_START_IWDG);
+    return 0;
+}
+
+/*********************************************************************
+ * @fn      IWDG_Feed
+ *
+ * @brief   系统必须定期重装载看门狗计数值以防止复位
+ *
+ * @param   none
+ *
+ * @return  none
+ */
+void IWDG_Feed(void)
+{
+    IWDG_KR_Set(KEY_RELOADING_COUNT);
+}
+

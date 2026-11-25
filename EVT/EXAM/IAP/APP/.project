@@ -24,7 +24,7 @@
     <link>
       <name>RVMSIS</name>
       <type>2</type>
-      <locationURI>PARENT-2-PROJECT_LOC/SRC/RVMSIS</locationURI>
+      <location>PARENT-2-PROJECT_LOC/SRC/RVMSIS</location>
     </link>
     <link>
       <name>StdPeriphDriver</name>
@@ -34,12 +34,59 @@
   </linkedResources>
   <filteredResources>
     <filter>
-      <id>1595986042669</id>
       <name/>
-      <type>22</type>
+      <type>6</type>
       <matcher>
         <id>org.eclipse.ui.ide.multiFilter</id>
         <arguments>1.0-name-matches-false-false-*.wvproj</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.7z</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.zip</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.tar</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.7z</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.zip</arguments>
+      </matcher>
+    </filter>
+    <filter>
+      <name/>
+      <type>6</type>
+      <matcher>
+        <id>org.eclipse.ui.ide.multiFilter</id>
+        <arguments>1.0-name-matches-false-false-*.tar</arguments>
       </matcher>
     </filter>
   </filteredResources>

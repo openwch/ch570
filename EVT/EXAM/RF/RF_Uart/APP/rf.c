@@ -226,6 +226,10 @@ void RFRole_RegisterStatusCbs( rfStatusCBs_t * p )
  */
 void RFRole_Init(void)
 {
+    sys_safe_access_enable( );
+    R32_MISC_CTRL = (R32_MISC_CTRL&(~(0x3f<<24)))|(0xe<<24);
+    sys_safe_access_disable( );
+
     {
         rfRoleConfig_t conf ={0};
         conf.rfProcessCB = RF_ProcessCallBack;
@@ -259,6 +263,19 @@ void RFRole_Init(void)
         gTxParam.properties = Properties.cfgVal;
         gTxParam.waitTime = 80*2;
         gTxParam.txPowerVal = LL_TX_PWR_0_DBM;
+    }
+    
+    if(gTxParam.txPowerVal > LL_TX_PWR_6_DBM)
+    {
+        sys_safe_access_enable( );
+        R32_MISC_CTRL |= (7<<6);
+        sys_safe_access_disable( );
+    }
+    else
+    {
+        sys_safe_access_enable( );
+        R32_MISC_CTRL = ((R32_MISC_CTRL &~(7<<6)) | (5<<6));
+        sys_safe_access_disable( );
     }
 
     // RX相关参数，全局变量

@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
- * Description        : 蓝牙鼠标应用程序，初始化广播连接参数，然后广播，直至连接主机后，定时上传键值
+ * Description        : 蓝牙鼠标应用程序，初始化广播连接参数，然后广播，直至连接主机后，定时上传鼠标移动数据
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 
@@ -112,9 +112,9 @@ static uint8_t scanRspData[] = {
     // connection interval range
     0x05, // length of this data
     GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), // 100ms
+    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL),
-    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), // 1s
+    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
 
     // service UUIDs
@@ -226,7 +226,7 @@ void HidEmu_Init()
         GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED, sizeof(uint8_t), &bonding);
     }
 
-    // Set up HID keyboard service
+    // Set up HID Mouse service
     Hid_AddService();
 
     // Register for HID Dev callback
@@ -288,8 +288,9 @@ uint16_t HidEmu_ProcessEvent(uint8_t task_id, uint16_t events)
     if(events & START_PHY_UPDATE_EVT)
     {
         // start phy update
-        PRINT("Send Phy Update %x...\n", GAPRole_UpdatePHY(hidEmuConnHandle, 0, 
-                    GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0));
+        uint8_t phyStatus = GAPRole_UpdatePHY(hidEmuConnHandle, 0,
+                                            GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0);
+        PRINT("Send Phy Update %x...\n", phyStatus);
 
         return (events ^ START_PHY_UPDATE_EVT);
     }
@@ -359,13 +360,13 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
     switch(newState & GAPROLE_STATE_ADV_MASK)
     {
         case GAPROLE_STARTED:
-        {
-            uint8_t ownAddr[6];
-            GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
-            GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
-            PRINT("Initialized..\n");
-        }
-        break;
+            {
+                uint8_t ownAddr[6];
+                GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
+                GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
+                PRINT("Initialized..\n");
+                break;
+            }
 
         case GAPROLE_ADVERTISING:
             if(pEvent->gap.opcode == GAP_MAKE_DISCOVERABLE_DONE_EVENT)
@@ -382,6 +383,7 @@ static void hidEmuStateCB(gapRole_States_t newState, gapRoleEvent_t *pEvent)
                 // get connection handle
                 hidEmuConnHandle = event->connectionHandle;
                 tmos_start_task(hidEmuTaskId, START_PARAM_UPDATE_EVT, START_PARAM_UPDATE_EVT_DELAY);
+                // tmos_start_task(hidEmuTaskId, START_PHY_UPDATE_EVT, START_PHY_UPDATE_DELAY);
                 PRINT("Connected..\n");
             }
             break;

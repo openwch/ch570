@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : OTAprofile.C
+ * File Name          : OTAprofile.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
@@ -33,11 +33,11 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-// Simple GATT Profile Service UUID: 0xFFF0
+// Simple GATT Profile Service UUID: 0xFEE0
 const uint8_t OTAProfileServUUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(OTAPROFILE_SERV_UUID), HI_UINT16(OTAPROFILE_SERV_UUID)};
 
-// Characteristic 1 UUID: 0xFFF1
+// Characteristic 1 UUID: 0xFEE1
 const uint8_t OTAProfilechar1UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(OTAPROFILE_CHAR_UUID), HI_UINT16(OTAPROFILE_CHAR_UUID)};
 
@@ -211,8 +211,8 @@ static bStatus_t OTAProfile_ReadAttrCB(uint16_t connHandle, gattAttribute_t *pAt
                 *pLen = 0;
                 if(OTAProfileReadLen)
                 {
-                    *pLen = OTAProfileReadLen;
-                    tmos_memcpy(pValue, OTAProfileReadBuf, OTAProfileReadLen);
+                    *pLen = (OTAProfileReadLen > maxLen) ? maxLen : OTAProfileReadLen; /* 不得超过ATT缓冲maxLen */
+                    tmos_memcpy(pValue, OTAProfileReadBuf, *pLen);
                     OTAProfileReadLen = 0;
                     if(OTAProfile_AppCBs && OTAProfile_AppCBs->pfnOTAProfileRead)
                     {
@@ -306,7 +306,7 @@ static bStatus_t OTAProfile_WriteAttrCB(uint16_t connHandle, gattAttribute_t *pA
  *
  * @return  函数执行状态
  */
-bStatus_t OTAProfile_SendData(unsigned char paramID, unsigned char *p_data, unsigned char send_len)
+bStatus_t OTAProfile_SendData(uint8_t paramID, uint8_t *p_data, uint8_t send_len)
 {
     bStatus_t status = SUCCESS;
 

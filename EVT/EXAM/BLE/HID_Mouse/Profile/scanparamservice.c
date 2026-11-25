@@ -280,7 +280,7 @@ void ScanParam_RefreshNotify(uint16_t connHandle)
         if(noti.pValue != NULL)
         {
             // send notification
-            noti.handle = scanParamAttrTbl[SCAN_PARAM_REFRESH_CCCD_IDX].handle;
+            noti.handle = scanParamAttrTbl[SCAN_PARAM_REFRESH_IDX].handle; /* 通知必须用特征值句柄, 而非CCCD句柄 */
             noti.len = SCAN_PARAM_REFRESH_LEN;
             noti.pValue[0] = SCAN_PARAM_REFRESH_REQ;
 
@@ -347,7 +347,7 @@ static bStatus_t scanParamWriteAttrCB(uint16_t connHandle, gattAttribute_t *pAtt
         if(len == SCAN_INTERVAL_WINDOW_CHAR_LEN)
         {
             uint16_t interval = BUILD_UINT16(pValue[0], pValue[1]);
-            uint16_t window = BUILD_UINT16(pValue[0], pValue[1]);
+            uint16_t window = BUILD_UINT16(pValue[2], pValue[3]); /* window在报文后半两个字段 */
 
             // Validate values
             if(window <= interval)

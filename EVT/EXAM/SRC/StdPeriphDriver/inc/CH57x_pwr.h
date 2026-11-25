@@ -33,7 +33,7 @@ typedef enum
     Fsys_Delay_6144,
     Fsys_Delay_4096,
 
-} WakeUP_ModeypeDef;
+} WakeUP_ModeTypeDef;
 
 /**
  * @brief  wakeup mode define
@@ -65,9 +65,9 @@ void PWR_PeriphClkCfg(FunctionalState s, uint16_t perph);
  *                    RB_SLP_RTC_WAKE   -  RTC 为唤醒源
  *                    RB_SLP_GPIO_WAKE  -  GPIO 为唤醒源
  *                    RB_SLP_BAT_WAKE   -  BAT 为唤醒源
- * @param   mode    - refer to WakeUP_ModeypeDef
+ * @param   mode    - refer to WakeUP_ModeTypeDef
  */
-void PWR_PeriphWakeUpCfg(FunctionalState s, uint8_t perph, WakeUP_ModeypeDef mode);
+void PWR_PeriphWakeUpCfg(FunctionalState s, uint8_t perph, WakeUP_ModeTypeDef mode);
 
 /**
  * @brief   电源监控
@@ -92,8 +92,7 @@ void LowPower_Halt(void);
  *          @note 注意调用此函数，DCDC功能强制关闭，唤醒后可以手动再次打开
  *
  * @param   rm      - 供电模块选择
- *                    RB_PWR_RAM2K  -   2K retention SRAM 供电
- *                    RB_PWR_RAM16K -   16K main SRAM 供电
+ *                    RB_PWR_RAM12K -   12K main SRAM 供电
  *                    RB_PWR_EXTEND -   USB 和 BLE 单元保留区域供电
  *                    RB_PWR_XROM   -   FlashROM 供电
  *                    NULL          -   以上单元都断电
@@ -105,8 +104,7 @@ void LowPower_Sleep(uint16_t rm);
  *          @note 注意调用此函数，DCDC功能强制关闭，唤醒后可以手动再次打开
  *
  * @param   rm      - 供电模块选择
- *                    RB_PWR_RAM2K  -   2K retention SRAM 供电
- *                    RB_PWR_RAM16K -   16K main SRAM 供电
+ *                    RB_PWR_RAM12K -   12K main SRAM 供电
  *                    NULL          -   以上单元都断电
  */
 void LowPower_Shutdown(uint16_t rm);

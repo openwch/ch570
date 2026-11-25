@@ -32,7 +32,7 @@ typedef enum
 {
     BLE_IOCHUB_EVT_TX_NOTI_DISABLED = 1,
     BLE_IOCHUB_EVT_TX_NOTI_ENABLED,
-    BLE_IOCHUB_EVT_BLE_DATA_RECIEVED,
+    BLE_IOCHUB_EVT_BLE_DATA_RECEIVED,
 } ble_iochub_evt_type_t;
 
 typedef struct

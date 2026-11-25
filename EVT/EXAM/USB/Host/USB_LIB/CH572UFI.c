@@ -3,7 +3,7 @@
 **   Copyright  (C)  W.ch  1999-2019   **
 **   Web:      http://wch.cn           **
 *****************************************
-**  USB-flash File Interface for CH585 **
+**  USB-flash File Interface for CH572 **
 **  KEIL423, gcc 8.20          **
 *****************************************
 */

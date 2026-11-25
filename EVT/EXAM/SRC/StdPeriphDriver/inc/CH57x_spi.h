@@ -44,21 +44,21 @@ typedef enum
 typedef enum
 {
     Mode_DataStream = 0, // 数据流模式
-    Mose_FirstCmd,       // 首字节命令模式
+    Mode_FirstCmd,       // 首字节命令模式
 } Slave_ModeTypeDef;
 
 /**
- * @brief   主机模式默认初始化：模式0+3线全双工+8MHz
+ * @brief   主机模式默认初始化
  */
 void SPI_MasterDefInit(void);
 
 /**
- * @brief   主机2线发送模式初始化：模式1+2线半双工+8MHz
+ * @brief   主机2线发送模式初始化
  */
 void SPI_2WIRE_MasterOutputInit(void);
 
 /**
- * @brief   主机2线接收模式初始化：模式1+2线半双工+8MHz
+ * @brief   主机2线接收模式初始化
  */
 void SPI_2WIRE_MasterReceiveInit(void);
 

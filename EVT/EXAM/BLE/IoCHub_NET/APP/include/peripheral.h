@@ -46,7 +46,7 @@ extern "C" {
 #define         DP_TYPE_VALUE                   0x02        //value 类型
 #define         DP_TYPE_STRING                  0x03        //string 类型
 #define         DP_TYPE_ENUM                    0x04        //enum 类型
-#define         DP_TYPE_BITMAP                  0x05        //fault 类型
+#define         DP_TYPE_BITMAP                  0x05        //bitmap 类型
 
 /*=============================BLE Packet Protocol Format=================================*/
 #define BLE_REC_FST          0xBB
@@ -56,15 +56,12 @@ extern "C" {
 #define BLE_SEND_SEC        0xCC
 
 #define BLE_HEAD_LEN        2
-#define BLE_FOMRAT_LEN   4
+#define BLE_FORMAT_LEN   4
 #define BLE_TAIL_LEN          1
 
 #define DP_ID_LIGHT           0x01      //灯控
 
 #define DP_ID_SWITCH        0x02      //开关
-
-
-
 
 #define IOCHUB_DEVICE_TYPE_INDEX    0
 #define IOCHUB_DEVICE_TYPE_LEN     2
@@ -76,10 +73,6 @@ extern "C" {
 #define IOCHUB_TYPE_NAME   0x01
 #define IOCHUB_TYPE_MAC     0x02
 #define IOCHUB_TYPE_MTU     0x03
-
-
-
-
 
 extern uint8_t Peripheral_TaskID; // Task ID for internal task/event processing
 /*================================================================================*/

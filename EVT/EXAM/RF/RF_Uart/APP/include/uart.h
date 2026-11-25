@@ -39,7 +39,7 @@ enum uart_status
 
 #define  DATA_LEN_UART       (32)
 
-extern uint8_t gBoundStatus;
+extern volatile uint8_t gBoundStatus; /* 跨中断/主循环访问 */
 
 void UART_Init(void);
 uint8_t UART_RxQuery( void *buf, typeBufSize *len );

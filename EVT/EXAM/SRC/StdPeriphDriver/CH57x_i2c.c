@@ -41,7 +41,7 @@ void I2C_Init(I2C_ModeTypeDef I2C_Mode, uint32_t I2C_ClockSpeed, I2C_DutyTypeDef
     sysClock = GetSysClock();
 
     R16_I2C_CTRL2 &= ~RB_I2C_FREQ;
-    R16_I2C_CTRL2 |= (sysClock / 1000000);
+    R16_I2C_CTRL2 |= (sysClock / 1000000) & RB_I2C_FREQ; 
 
     R16_I2C_CTRL1 &= ~RB_I2C_PE;
 

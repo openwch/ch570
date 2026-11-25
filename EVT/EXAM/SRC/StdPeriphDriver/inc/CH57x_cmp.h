@@ -66,10 +66,27 @@ typedef enum
 
 #define CMP_Disable() (R8_CMP_CTRL_0 &= ~RB_CMP_EN)
 
+/**
+ * @brief   Comparator initialization.
+ *
+ * @param   s   - Comparator channel input selection, refer to CMPSwTypeDef.
+ * @param   v   - Comparator negative end Vref level, refer to CMPNrefLevelTypeDef.
+ */
 void CMP_Init (CMPSwTypeDef s, CMPNrefLevelTypeDef v);
 
+/**
+ * @brief   Enable or disable comparator output to TIM capture.
+ *
+ * @param   s   - ENABLE or DISABLE.
+ */
 void CMP_OutToTIMCAPCfg(FunctionalState s);
 
+/**
+ * @brief   Comparator interrupt configuration.
+ *
+ * @param   sel - Comparator output selection, refer to CMPOutSelTypeDef.
+ * @param   s   - ENABLE or DISABLE.
+ */
 void CMP_INTCfg (CMPOutSelTypeDef sel, FunctionalState s);
 
 #ifdef __cplusplus

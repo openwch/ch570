@@ -1,12 +1,12 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : peripheral.C
+ * File Name          : peripheral.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
- * Description        : 572测速例程，默认会更新phy和param
+ * Description        : 572测速例程，定时器统计速率，支持双向测速（SPEED_TEST_DIR选择方向），默认会更新phy和param
  *
  *********************************************************************************
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.c
  * Attention: This software (modified or not) and binary are used for 
  * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
@@ -25,10 +25,6 @@
 /*********************************************************************
  * CONSTANTS
  */
-
-// How often to perform periodic event
-#define SBP_SPEED_TEST_EVT_PERIOD            3200
-
 // How often to perform read rssi event
 #define SBP_READ_RSSI_EVT_PERIOD             3200
 
@@ -46,10 +42,10 @@
 #define DEFAULT_DISCOVERABLE_MODE            GAP_ADTYPE_FLAGS_GENERAL
 
 // Minimum connection interval (units of 1.25ms, 6=7.5ms)
-#define DEFAULT_DESIRED_MIN_CONN_INTERVAL    6
+#define DEFAULT_DESIRED_MIN_CONN_INTERVAL    7
 
 // Maximum connection interval (units of 1.25ms, 100=125ms)
-#define DEFAULT_DESIRED_MAX_CONN_INTERVAL    6
+#define DEFAULT_DESIRED_MAX_CONN_INTERVAL    7
 
 // Slave latency to use parameter update
 #define DEFAULT_DESIRED_SLAVE_LATENCY        0
@@ -60,7 +56,7 @@
 // Company Identifier: WCH
 #define WCH_COMPANY_ID                       0x07D7
 
-#define ATT_MTU_SPT_SIZE                     23
+#define ATT_MTU_DEFAULT_SIZE                     23
 /*********************************************************************
  * TYPEDEFS
  */
@@ -107,9 +103,9 @@ static uint8_t scanRspData[] = {
     // connection interval range
     0x05, // length of this data
     GAP_ADTYPE_SLAVE_CONN_INTERVAL_RANGE,
-    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), // 100ms
+    LO_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MIN_CONN_INTERVAL),
-    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), // 1s
+    LO_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL), 
     HI_UINT16(DEFAULT_DESIRED_MAX_CONN_INTERVAL),
 
     // Tx power level
@@ -142,13 +138,21 @@ static uint8_t attDeviceName[GAP_DEVICE_NAME_LEN] = "Simple Peripheral";
 // Connection item list
 static peripheralConnItem_t peripheralConnList;
 
-static uint16_t peripheralMTU = ATT_MTU_SPT_SIZE;
+static uint16_t peripheralMTU = ATT_MTU_DEFAULT_SIZE;
 
-static uint8_t speed_test_enable = FALSE;
+static volatile uint8_t speed_test_enable = FALSE;
 
-static uint8_t speed_test_buf[244] = {0};
+static uint8_t speed_test_buf[BLE_BUFF_MAX_LEN - 7] = {0};
 
-static uint32_t peripheralTxDataLen = 0;
+static volatile uint32_t peripheralTxDataLen = 0;
+static volatile uint32_t peripheralTxRate = 0; 
+
+#if SPEED_TEST_DIR == 1
+static uint32_t peripheralRxDataLen = 0;
+static volatile uint32_t peripheralRxRate = 0; 
+#endif
+
+static volatile uint8_t tmr_speed_tick = 0;
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
@@ -181,8 +185,8 @@ static gapRolesBroadcasterCBs_t Broadcaster_BroadcasterCBs = {
 // GAP Bond Manager Callbacks
 static gapBondCBs_t Peripheral_BondMgrCBs = {
     NULL, // Passcode callback (not used by application)
-    NULL, // Passcode callback (not used by application)
-    NULL  // Pairing / Bonding state Callback (not used by application)
+    NULL, // Pairing / Bonding state Callback (not used by application)
+    NULL, // resv
 };
 
 // Simple GATT Profile Callbacks
@@ -200,7 +204,7 @@ static simpleProfileCBs_t Peripheral_SimpleProfileCBs = {
  *          This is called during initialization and should contain
  *          any application specific initialization (ie. hardware
  *          initialization/setup, table initialization, power up
- *          notificaiton ... ).
+ *          notification ... ).
  *
  * @param   task_id - the ID assigned by TMOS.  This ID should be
  *                    used to send messages and set timers.
@@ -247,6 +251,8 @@ void Peripheral_Init()
         GAPBondMgr_SetParameter(GAPBOND_PERI_BONDING_ENABLED, sizeof(uint8_t), &bonding);
     }
 
+    // Initialize GATT Client
+    GATT_InitClient();
     // Initialize GATT attributes
     GGS_AddService(GATT_ALL_SERVICES);           // GAP
     GATTServApp_AddService(GATT_ALL_SERVICES);   // GATT attributes
@@ -290,16 +296,16 @@ void Peripheral_Init()
  *
  * @brief   Init Connection Item
  *
- * @param   peripheralConnList -
+ * @param   pConnItem -
  *
  * @return  NULL
  */
-static void peripheralInitConnItem(peripheralConnItem_t *peripheralConnList)
+static void peripheralInitConnItem(peripheralConnItem_t *pConnItem)
 {
-    peripheralConnList->connHandle = GAP_CONNHANDLE_INIT;
-    peripheralConnList->connInterval = 0;
-    peripheralConnList->connSlaveLatency = 0;
-    peripheralConnList->connTimeout = 0;
+    pConnItem->connHandle = GAP_CONNHANDLE_INIT;
+    pConnItem->connInterval = 0;
+    pConnItem->connSlaveLatency = 0;
+    pConnItem->connTimeout = 0;
 }
 
 /*********************************************************************
@@ -317,7 +323,7 @@ static void peripheralInitConnItem(peripheralConnItem_t *peripheralConnList)
  */
 uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
 {
-    //  VOID task_id; // TMOS required parameter that isn't used in this function
+    (void)task_id;   /* TMOS 要求参数，本函数未使用 */
 
     if(events & SYS_EVENT_MSG)
     {
@@ -340,22 +346,30 @@ uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
         return (events ^ SBP_START_DEVICE_EVT);
     }
 
-    if(events & SBP_SPEED_TEST_EVT)
+#if SPEED_TEST_DIR == 0
+    if(events & SBP_TEST_EVT)
     {
-        if( speed_test_enable )
+        uint16_t txLen = peripheralMTU - 3;
+
+        if(txLen > sizeof(speed_test_buf)) /* 协商MTU可大于缓冲区, 必须限幅防止越界读 */
         {
-            PRINT("Tx: %dB/s\n", peripheralTxDataLen);
-            peripheralTxDataLen = 0;
+            txLen = sizeof(speed_test_buf);
         }
-        else
+        while(1)
         {
-            // start speed test
-            PRINT("start speed test..\n");
-            speed_test_enable = TRUE;
+            if( peripheralChar4Notify(speed_test_buf, txLen) )
+            {
+                break;
+            }
+            else
+            {
+                peripheralTxDataLen += txLen;
+            }
         }
-        tmos_start_task(Peripheral_TaskID, SBP_SPEED_TEST_EVT, 1600);
-        return (events ^ SBP_SPEED_TEST_EVT);
+
+        return (events ^ SBP_TEST_EVT);
     }
+#endif
 
     if(events & SBP_PARAM_UPDATE_EVT)
     {
@@ -375,8 +389,8 @@ uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
     if(events & SBP_PHY_UPDATE_EVT)
     {
         // start phy update
-        PRINT("PHY Update %x...\n", GAPRole_UpdatePHY(peripheralConnList.connHandle, 0,
-                    GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0));
+        GAPRole_UpdatePHY(peripheralConnList.connHandle, 0,
+                    GAP_PHY_BIT_LE_2M, GAP_PHY_BIT_LE_2M, 0);
 
         return (events ^ SBP_PHY_UPDATE_EVT);
     }
@@ -388,6 +402,24 @@ uint16_t Peripheral_ProcessEvent(uint8_t task_id, uint16_t events)
         return (events ^ SBP_READ_RSSI_EVT);
     }
 
+    if(events & SBP_SPEED_TEST_EVT)
+    {
+        if( speed_test_enable )
+        {
+#if SPEED_TEST_DIR == 1
+            PRINT("Rx: %dB/s\n", peripheralRxRate);
+#else
+            PRINT("Tx: %dB/s\n", peripheralTxRate);
+#endif
+        }
+        else
+        {
+            PRINT("start speed test..\n");
+            speed_test_enable = TRUE;
+        }
+        return (events ^ SBP_SPEED_TEST_EVT);
+    }
+	
     // Discard unknown events
     return 0;
 }
@@ -475,20 +507,31 @@ static void Peripheral_LinkEstablished(gapRoleEvent_t *pEvent)
     }
     else
     {
+        
+        // Update MTU
+        attExchangeMTUReq_t req = {
+            .clientRxMTU = BLE_BUFF_MAX_LEN - 4,
+        };
+
+        GATT_ExchangeMTU(event->connectionHandle, &req, Peripheral_TaskID);
+
         peripheralConnList.connHandle = event->connectionHandle;
         peripheralConnList.connInterval = event->connInterval;
         peripheralConnList.connSlaveLatency = event->connLatency;
         peripheralConnList.connTimeout = event->connTimeout;
-        peripheralMTU = ATT_MTU_SPT_SIZE;
+        peripheralMTU = ATT_MTU_DEFAULT_SIZE;
 
-        // Set timer for periodic event
-        tmos_start_task(Peripheral_TaskID, SBP_SPEED_TEST_EVT, SBP_SPEED_TEST_EVT_PERIOD);
+        // 500ms hardware timer: 2 ticks = 1s speed statistics period
+        tmr_speed_tick = 0;
+        TMR_TimerInit(FREQ_SYS / 2);
+        TMR_ITCfg(ENABLE, TMR_IT_CYC_END);
+        PFIC_EnableIRQ(TMR_IRQn);
 
         // Set timer for param update event
-        tmos_start_task(Peripheral_TaskID, SBP_PARAM_UPDATE_EVT, SBP_PARAM_UPDATE_DELAY);
+        // tmos_start_task(Peripheral_TaskID, SBP_PARAM_UPDATE_EVT, SBP_PARAM_UPDATE_DELAY);
 
         // Set timer for phy update event
-        tmos_start_task(Peripheral_TaskID, SBP_PHY_UPDATE_EVT, SBP_PARAM_UPDATE_DELAY);
+        // tmos_start_task(Peripheral_TaskID, SBP_PHY_UPDATE_EVT, SBP_PARAM_UPDATE_DELAY);
 
         PRINT("Conn %x - Int %x \n", event->connectionHandle, event->connInterval);
     }
@@ -513,7 +556,10 @@ static void Peripheral_LinkTerminated(gapRoleEvent_t *pEvent)
         peripheralConnList.connInterval = 0;
         peripheralConnList.connSlaveLatency = 0;
         peripheralConnList.connTimeout = 0;
-        tmos_stop_task(Peripheral_TaskID, SBP_SPEED_TEST_EVT);
+        TMR_ITCfg(DISABLE, TMR_IT_CYC_END);
+        PFIC_DisableIRQ(TMR_IRQn);
+        tmr_speed_tick = 0;
+
         tmos_stop_task(Peripheral_TaskID, SBP_READ_RSSI_EVT);
 
         // Restart advertising
@@ -586,8 +632,13 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
     switch(newState & GAPROLE_STATE_ADV_MASK)
     {
         case GAPROLE_STARTED:
+        {
+            uint8_t ownAddr[6];
+            GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
+            GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
             PRINT("Initialized..\n");
             break;
+        }
 
         case GAPROLE_ADVERTISING:
             if(pEvent->gap.opcode == GAP_LINK_TERMINATED_EVENT)
@@ -706,19 +757,26 @@ static void simpleProfileChangeCB(uint8_t paramID, uint8_t *pValue, uint16_t len
     {
         case SIMPLEPROFILE_CHAR1:
         {
-            uint8_t newValue[SIMPLEPROFILE_CHAR1_LEN];
-            tmos_memcpy(newValue, pValue, len);
-            PRINT("profile ChangeCB CHAR1.. \n");
+            // uint8_t newValue[SIMPLEPROFILE_CHAR1_LEN];
+            // tmos_memcpy(newValue, pValue, len);
+#if SPEED_TEST_DIR == 1
+            if( speed_test_enable )
+            {
+                peripheralRxDataLen += len;
+            }
+#else
+            // PRINT("profile ChangeCB CHAR1.. \n");
+#endif
             break;
         }
 
-//        case SIMPLEPROFILE_CHAR3:
-//        {
+        case SIMPLEPROFILE_CHAR3:
+        {
 //            uint8_t newValue[SIMPLEPROFILE_CHAR3_LEN];
 //            tmos_memcpy(newValue, pValue, len);
 //            PRINT("profile ChangeCB CHAR3..\n");
 //            break;
-//        }
+        }
 
         default:
             // should not reach here!
@@ -737,19 +795,44 @@ static void simpleProfileChangeCB(uint8_t paramID, uint8_t *pValue, uint16_t len
  */
 static void peripheralConnectEventCB( uint32_t timeUs )
 {
+#if SPEED_TEST_DIR == 1
+#else
     if( speed_test_enable )
     {
-        while(1)
-        {
-            if( peripheralChar4Notify(speed_test_buf, peripheralMTU - 3) )
-            {
-                break;
-            }
-            else
-            {
-                peripheralTxDataLen += peripheralMTU - 3;
-            }
+        tmos_set_event(Peripheral_TaskID, SBP_TEST_EVT);
+    }
+#endif
+}
 
+/*********************************************************************
+ * @fn      TMR_IRQHandler
+ *
+ * @brief   500ms timer ISR: 2 ticks = 1s speed statistics period.
+ *
+ * @return  none
+ */
+__INTERRUPT
+__HIGH_CODE
+void TMR_IRQHandler(void)
+{
+    if(TMR_GetITFlag(TMR_IT_CYC_END))
+    {
+        TMR_ClearITFlag(TMR_IT_CYC_END);
+        tmr_speed_tick++;
+        if(tmr_speed_tick >= 2)
+        {
+            tmr_speed_tick = 0;
+            if( speed_test_enable )
+            {
+#if SPEED_TEST_DIR == 1
+                peripheralRxRate = peripheralRxDataLen;
+                peripheralRxDataLen = 0;
+#else
+                peripheralTxRate = peripheralTxDataLen;
+                peripheralTxDataLen = 0;
+#endif
+            }
+            tmos_set_event(Peripheral_TaskID, SBP_SPEED_TEST_EVT);
         }
     }
 }

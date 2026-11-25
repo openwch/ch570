@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : startup_CH57x.s
+ * File Name          : startup_CH572.S
  * Author             : WCH
  * Version            : V1.0.0
  * Date               : 2024/12/20
@@ -105,7 +105,7 @@ CMP_IRQHandler:
 I2C_IRQHandler:
 PWMX_IRQHandler:
 KEYSCAN_IRQHandler:
-ENDOCE_IRQHandler:
+ENCODER_IRQHandler:
 WDOG_BAT_IRQHandler: 
 1:  
 	j 1b

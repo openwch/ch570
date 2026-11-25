@@ -222,17 +222,17 @@ void ENC_Config(uint8_t s, uint32_t encReg, ENCModeTypeDef m);
  *
  * @return  方向值  0:前进  1:后退
  */
-#define ENC_GetCurrentDir       (R8_ENC_REG_CTRL>>5 & 0x01)
+#define ENC_GetCurrentDir()       (R8_ENC_REG_CTRL>>5 & 0x01)
 
 /**
  * @brief   获取编码器当前计数值
  */
-#define ENC_GetCurrentCount      R32_ENC_REG_CCNT
+#define ENC_GetCurrentCount()      R32_ENC_REG_CCNT
 
 /**
  * @brief   编码器模式读计数并清0
  */
-#define ENC_GetCountandReset()  R8_ENC_REG_CTRL |= RB_RD_CLR_EN
+#define ENC_GetCountandReset()  (R8_ENC_REG_CTRL |= RB_RD_CLR_EN)
 
 /**
  * @brief   ENC中断配置

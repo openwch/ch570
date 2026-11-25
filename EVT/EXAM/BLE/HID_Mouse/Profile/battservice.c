@@ -24,11 +24,6 @@
 /*********************************************************************
  * CONSTANTS
  */
-
-// ADC voltage levels
-#define BATT_ADC_LEVEL_3V            409
-#define BATT_ADC_LEVEL_2V            273
-
 #define BATT_LEVEL_VALUE_IDX         2    // Position of battery level in attribute array
 #define BATT_LEVEL_VALUE_CCCD_IDX    3    // Position of battery level CCCD in attribute array
 
@@ -63,19 +58,15 @@ const uint8_t battLevelUUID[ATT_BT_UUID_SIZE] = {
 // Application callback
 static battServiceCB_t battServiceCB;
 
-// ADC channel to be used for reading
-//static uint8_t battServiceAdcCh = HAL_ADC_CHANNEL_VDD;
-
 /*********************************************************************
  * Profile Attributes - variables
  */
-
 // Battery Service attribute
 static const gattAttrType_t battService = {ATT_BT_UUID_SIZE, battServUUID};
 
 // Battery level characteristic
 static uint8_t       battLevelProps = GATT_PROP_READ | GATT_PROP_NOTIFY;
-static uint8_t       battLevel = 100;
+static uint8_t       battLevel = 60;
 static gattCharCfg_t battLevelClientCharCfg[GATT_MAX_NUM_CONN];
 
 // HID Report Reference characteristic descriptor, battery level
@@ -442,12 +433,10 @@ static void battNotifyCB(linkDBItem_t *pLinkItem)
  */
 static uint8_t battMeasure(void)
 {
-    uint16_t adc;
     uint8_t  percent;
 
-    // Configure ADC and perform a read
-    adc = 300;
-    percent = adc/6;
+    // Configure ADC and perform a read, demo 占位并统一初值
+    percent = 60;
 
     return percent;
 }

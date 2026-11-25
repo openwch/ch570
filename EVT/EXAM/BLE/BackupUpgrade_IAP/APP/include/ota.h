@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.10
  * Date               : 2018/12/14
- * Description        : oad相关配置定义
+ * Description        : ota相关配置定义
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 
@@ -21,7 +21,7 @@
 /* 整个用户code区分成四块，4K，108K，108K，12K，   4K(OTA_FLAG) 4K(NVS) 后三块下面分别叫做imageA（APP），imageB（OTA）和imageIAP */
 
 /* FLASH定义 */
-#define IMAGE_SIZE             108 * 1024
+#define IMAGE_SIZE            (108 * 1024)
 
 /* imageA定义 */
 #define IMAGE_A_FLAG           0x01
@@ -36,7 +36,7 @@
 /* imageIAP定义 */
 #define IMAGE_IAP_FLAG         0x03
 #define IMAGE_IAP_START_ADD    (IMAGE_B_START_ADD + IMAGE_SIZE)
-#define IMAGE_IAP_SIZE         12 * 1024
+#define IMAGE_IAP_SIZE         (12 * 1024)
 
 /* IAP定义 */
 /* 以下为IAP下载命令定义 */
@@ -55,8 +55,8 @@
 /* 存放在DataFlash里的OTA信息 */
 typedef struct
 {
-    unsigned char ImageFlag; //记录的当前的image标志
-    unsigned char Revd[3];
+    uint8_t ImageFlag; //记录的当前的image标志
+    uint8_t Revd[3];
 } OTADataFlashInfo_t;
 
 /* OTA IAP通讯协议定义 */
@@ -65,45 +65,45 @@ typedef union
 {
     struct
     {
-        unsigned char cmd;          /* 命令码 0x81 */
-        unsigned char len;          /* 后续数据长度 */
-        unsigned char addr[2];      /* 擦除地址 */
-        unsigned char block_num[2]; /* 擦除块数 */
+        uint8_t cmd;          /* 命令码 0x81 */
+        uint8_t len;          /* 后续数据长度 */
+        uint8_t addr[2];      /* 擦除地址 */
+        uint8_t block_num[2]; /* 擦除块数 */
 
     } erase; /* 擦除命令 */
     struct
     {
-        unsigned char cmd;       /* 命令码 0x83 */
-        unsigned char len;       /* 后续数据长度 */
-        unsigned char status[2]; /* 两字节状态，保留 */
+        uint8_t cmd;       /* 命令码 0x83 */
+        uint8_t len;       /* 后续数据长度 */
+        uint8_t status[2]; /* 两字节状态，保留 */
     } end;                       /* 结束命令 */
     struct
     {
-        unsigned char cmd;              /* 命令码 0x82 */
-        unsigned char len;              /* 后续数据长度 */
-        unsigned char addr[2];          /* 校验地址 */
-        unsigned char buf[IAP_LEN - 4]; /* 校验数据 */
+        uint8_t cmd;              /* 命令码 0x82 */
+        uint8_t len;              /* 后续数据长度 */
+        uint8_t addr[2];          /* 校验地址 */
+        uint8_t buf[IAP_LEN - 4]; /* 校验数据 */
     } verify;                           /* 校验命令 */
     struct
     {
-        unsigned char cmd;              /* 命令码 0x80 */
-        unsigned char len;              /* 后续数据长度 */
-        unsigned char addr[2];          /* 地址 */
-        unsigned char buf[IAP_LEN - 4]; /* 后续数据 */
+        uint8_t cmd;              /* 命令码 0x80 */
+        uint8_t len;              /* 后续数据长度 */
+        uint8_t addr[2];          /* 地址 */
+        uint8_t buf[IAP_LEN - 4]; /* 后续数据 */
     } program;                          /* 编程命令 */
     struct
     {
-        unsigned char cmd;              /* 命令码 0x84 */
-        unsigned char len;              /* 后续数据长度 */
-        unsigned char buf[IAP_LEN - 2]; /* 后续数据 */
+        uint8_t cmd;              /* 命令码 0x84 */
+        uint8_t len;              /* 后续数据长度 */
+        uint8_t buf[IAP_LEN - 2]; /* 后续数据 */
     } info;                             /* 编程命令 */
     struct
     {
-        unsigned char buf[IAP_LEN]; /* 接收数据包*/
+        uint8_t buf[IAP_LEN]; /* 接收数据包*/
     } other;
 } OTA_IAP_CMD_t;
 
 /* 记录当前的Image */
-extern unsigned char CurrImageFlag;
+extern uint8_t CurrImageFlag;
 
 #endif

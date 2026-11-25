@@ -23,10 +23,10 @@
  */
 void PWMX_CycleCfg(PWMX_CycleTypeDef cyc)
 {
+    R8_PWM_CONFIG &= ~(0x07);
     switch(cyc)
     {
         case PWMX_Cycle_256:
-            R8_PWM_CONFIG &= ~(0x07);
             break;
 
         case PWMX_Cycle_255:
@@ -57,7 +57,7 @@ void PWMX_CycleCfg(PWMX_CycleTypeDef cyc)
 /*********************************************************************
  * @fn      PWMX_16bit_CycleCfg
  *
- * @brief   PWM 16位周期配置
+ * @brief   PWM 16位周期配置，PWM1/2/3共用周期，PWM4/5共用周期
  *
  * @param   cyc     - 16位周期
  *
@@ -142,23 +142,45 @@ void PWMX_ACTOUT(uint8_t ch, uint8_t da, PWMX_PolarTypeDef pr, FunctionalState s
         switch(ch)
         {
             case CH_PWM1:
-                *((volatile uint16_t *)((&R8_PWM1_DATA))) = da;
+                *((volatile uint8_t *)((&R8_PWM1_DATA))) = da;
                 break;
             case CH_PWM2:
-                *((volatile uint16_t *)((&R8_PWM2_DATA))) = da;
+                *((volatile uint8_t *)((&R8_PWM2_DATA))) = da;
                 break;
             case CH_PWM3:
-                *((volatile uint16_t *)((&R8_PWM3_DATA))) = da;
+                *((volatile uint8_t *)((&R8_PWM3_DATA))) = da;
                 break;
             case CH_PWM4:
-                *((volatile uint16_t *)((&R8_PWM4_DATA))) = da;
+                *((volatile uint8_t *)((&R8_PWM4_DATA))) = da;
                 break;
             case CH_PWM5:
-                *((volatile uint16_t *)((&R8_PWM5_DATA))) = da;
+                *((volatile uint8_t *)((&R8_PWM5_DATA))) = da;
                 break;
             default:
                 break;
         }
+        R8_PWM_OUT_EN |= (ch);
+    }
+}
+
+/*********************************************************************
+ * @fn      PWMXOutCfg
+ *
+ * @brief   PWM 输出配置
+ *
+ * @param   ch      - select group of PWM output
+ * @param   s       - control pwmx function, ENABLE or DISABLE
+ *
+ * @return  none
+ */
+void PWMXOutCfg(uint8_t ch, FunctionalState s)
+{
+    if(s == DISABLE)
+    {
+        R8_PWM_OUT_EN &= ~(ch);
+    }
+    else
+    {
         R8_PWM_OUT_EN |= (ch);
     }
 }
@@ -209,6 +231,34 @@ void PWMX_SyncOutCfg(FunctionalState s)
 }
 
 /*********************************************************************
+ * @fn      PWM_INTCfg
+ *
+ * @brief   PWM中断配置
+ *
+ * @param   s       - 中断控制状态，是否使能相应中断
+ * @param   i       - 中断类型
+ *                    RB_PWM_IE_CYC   - PWM1、2、3 周期结束中断使能位
+ *                    RB_PWM1_IE_CYC  - PWM4、5 周期结束中断使能位
+ *                    RB_PWM_IE_FIFO  - FIFO 数据小于 4 中断使能位
+ *                    RB_PWM_IE_DMA   - DMA 传输结束中断使能位
+ *                    RB_PWM_IE_OVER  - FIFO 读空中断使能位
+ *
+ * @return  none
+ */
+void PWM_INTCfg(FunctionalState s, uint8_t i)
+{
+    if(s)
+    {
+        R8_PWM_INT_EN |= i;
+    }
+    else
+    {
+        R8_PWM_INT_EN &= ~i;
+    }
+}
+
+
+/*********************************************************************
  * @fn      PWM_DMACfg
  *
  * @brief   配置PWM DMA功能
@@ -226,21 +276,29 @@ void PWM_DMACfg(uint8_t s, uint32_t startAddr, uint32_t endAddr, PWM_DMAModeType
     if(s == DISABLE)
     {
         R8_PWM_DMA_CTRL = 0;
+        R8_PWM_CONFIG &= ~(RB_PWM_SYNC_EN | RB_PWM_SYNC_START);
     }
     else
     {
-        R32_PWM_DMA_BEG = startAddr & 0xFFFF;
-        R32_PWM_DMA_END = endAddr & 0xFFFF;
+        R32_PWM_DMA_BEG = startAddr;
+        R32_PWM_DMA_END = endAddr;
+
+        if(ch != Mode_DMACH4_5)
+        {
+           if(ch == Mode_DMACH1_3)
+           {
+                R8_PWM_DMA_CTRL |= RB_DMA_SEL;
+           }
+           else
+           {
+                R8_PWM_DMA_CTRL |= RB_DMA_SEL;
+                R8_PWM_CONFIG |= RB_PWM_SYNC_EN | RB_PWM_SYNC_START;
+           }
+        }
 
         if(m)
             R8_PWM_DMA_CTRL = RB_DMA_ADDR_LOOP | RB_DMA_ENABLE;
         else
             R8_PWM_DMA_CTRL = RB_DMA_ENABLE;
-
-        if(ch != Mode_DMACH4_5)
-        {
-           if(ch == Mode_DMACH1_3)  R8_PWM_DMA_CTRL |= RB_DMA_SEL;
-           else   R8_PWM_CONFIG |= RB_PWM_SYNC_EN | RB_PWM_SYNC_START;
-        }
     }
 }

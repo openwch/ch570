@@ -83,7 +83,7 @@ typedef enum
 void PWMX_CycleCfg(PWMX_CycleTypeDef cyc);
 
 /**
- * @brief   PWM 16位周期配置
+ * @brief   PWM 16位周期配置，PWM1/2/3共用周期，PWM4/5共用周期
  *
  * @param   ch  - select channel of pwm, refer to channel of PWM define
  *          cyc - 16位周期
@@ -191,6 +191,14 @@ void PWMX_ACTOUT(uint8_t ch, uint8_t da, PWMX_PolarTypeDef pr, FunctionalState s
 void PWMX_16bit_ACTOUT(uint8_t ch, uint16_t da, PWMX_PolarTypeDef pr, FunctionalState s);
 
 /**
+ * @brief   PWM 输出配置
+ *
+ * @param   ch      - select group of PWM output
+ * @param   s       - control pwmx function, ENABLE or DISABLE
+ */
+void PWMXOutCfg(uint8_t ch, FunctionalState s);
+
+/**
  * @brief   PWM 交替输出模式配置
  *
  * @param   ch      - select group of PWM alternate output
@@ -205,6 +213,23 @@ void PWMX_AlterOutCfg(uint8_t ch, FunctionalState s);
  * @param   s       - control pwmx function, ENABLE or DISABLE
  */
 void PWMX_SyncOutCfg(FunctionalState s);
+
+/*********************************************************************
+ * @fn      PWM_INTCfg
+ *
+ * @brief   PWM中断配置
+ *
+ * @param   s       - 中断控制状态，是否使能相应中断
+ * @param   i       - 中断类型
+ *                    RB_PWM_IE_CYC   - PWM1、2、3 周期结束中断使能位
+ *                    RB_PWM1_IE_CYC  - PWM4、5 周期结束中断使能位
+ *                    RB_PWM_IE_FIFO  - FIFO 数据小于 4 中断使能位
+ *                    RB_PWM_IE_DMA   - DMA 传输结束中断使能位
+ *                    RB_PWM_IE_OVER  - FIFO 读空中断使能位
+ *
+ * @return  none
+ */
+void PWM_INTCfg(FunctionalState s, uint8_t i);
 
 /**
  * @brief   配置PWM DMA功能

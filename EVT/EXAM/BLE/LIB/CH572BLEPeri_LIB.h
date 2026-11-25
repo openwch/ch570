@@ -1,7 +1,7 @@
 /********************************** (C) COPYRIGHT ******************************
  * File Name         : CH572BLEPeri_LIB.H
  * Author            : WCH
- * Version           : V1.21
+ * Version           : V1.40
  * Date              : 2024/03/14
  * Description       : head file(CH572)
  * Copyright (c) 2023 Nanjing Qinheng Microelectronics Co., Ltd.
@@ -92,7 +92,7 @@ typedef struct tag_ble_config
                                     // ATT_MTU = BufMaxLen-4,Range[23,ATT_MAX_MTU_SIZE]
     uint8_t TxNumEvent;             // Maximum number of TX data in a connection event ( default 1 )
     uint8_t RxNumEvent;             // Maximum number of RX data in a connection event ( default equal to BufNumber )
-    uint8_t TxPower;                // Transmit power level( default LL_TX_POWEER_0_DBM(0dBm) )
+    uint8_t TxPower;                // Transmit power level( default LL_TX_PWR_0_DBM(0dBm) )
     uint8_t WindowWidening;         // Wait rf start window(us)
     uint8_t WaitWindow;             // Wait event arrive window in one system clock
     uint8_t MacAddr[6];             // MAC address,little-endian
@@ -139,7 +139,7 @@ typedef struct
 /*********************************************************************
  * GLOBAL MACROS
  */
-#define VER_FILE  "CH572_BLE_PERI_LIB_V1.2"
+#define VER_FILE  "CH572_BLE_PERI_LIB_V1.4"
 extern const uint8_t VER_LIB[];  // LIB version
 #define SYSTEM_TIME_MICROSEN            625   // unit of process event timer is 625us
 #define MS1_TO_SYSTEM_TIME(x)  ((x)*1000/SYSTEM_TIME_MICROSEN)   // transform unit in ms to unit in 625us ( attentional bias )
@@ -187,16 +187,17 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define LL_TX_PWR_MINUS_15_DBM       0x03
 #define LL_TX_PWR_MINUS_10_DBM       0x05
 #define LL_TX_PWR_MINUS_8_DBM        0x07
-#define LL_TX_PWR_MINUS_5_DBM        0x0A
+#define LL_TX_PWR_MINUS_5_DBM        0x09
 #define LL_TX_PWR_MINUS_3_DBM        0x0C
-#define LL_TX_PWR_MINUS_1_DBM        0x10
+#define LL_TX_PWR_MINUS_1_DBM        0x0F
 #define LL_TX_PWR_0_DBM              0x12
-#define LL_TX_PWR_1_DBM              0x15
-#define LL_TX_PWR_2_DBM              0x18
+#define LL_TX_PWR_1_DBM              0x14
+#define LL_TX_PWR_2_DBM              0x17
 #define LL_TX_PWR_3_DBM              0x1B
-#define LL_TX_PWR_4_DBM              0x1F
-#define LL_TX_PWR_5_DBM              0x25
-#define LL_TX_PWR_6_DBM              0x2D
+#define LL_TX_PWR_4_DBM              0x20
+#define LL_TX_PWR_5_DBM              0x28
+#define LL_TX_PWR_6_DBM              0x36
+#define LL_TX_PWR_7_DBM              0x3F
 
 
 /* ERR_LIB_INIT define */
@@ -2379,6 +2380,24 @@ extern void LL_AdvertiseEventRegister( pfnEventCB advEventCB );
  * @return  Command Status.
  */
 extern bStatus_t LL_SetTxPowerLevel( uint8_t power );
+
+/**
+ * @brief   read rssi
+ *
+ * @param   None.
+ *
+ * @return  the value of rssi.
+ */
+extern int8_t BLE_ReadRssi( void );
+
+/**
+ * @brief   read cfo
+ *
+ * @param   None.
+ *
+ * @return  the value of cfo.
+ */
+extern int16_t BLE_ReadCfo( void );
 
 /**
  * @brief   pa control init

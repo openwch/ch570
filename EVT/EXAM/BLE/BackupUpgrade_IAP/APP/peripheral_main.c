@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : main.c
+ * File Name          : peripheral_main.c
  * Author             : WCH
  * Version            : V1.1
  * Date               : 2019/11/05
@@ -13,15 +13,16 @@
 /******************************************************************************/
 /* 头文件包含 */
 #include "CH57x_common.h"
-#include "OTA.h"
+#include "ota.h"
 
 /* 记录当前的Image */
 unsigned char CurrImageFlag = 0xff;
 
 /* flash的数据临时存储 */
 __attribute__((aligned(8))) uint8_t block_buf[16];
+__attribute__((aligned(8))) uint8_t flash_data[1024];
 
-#define jumpApp    ((void (*)(void))((int *)IMAGE_A_START_ADD))
+#define APP_ENTRY    ((void (*)(void))((int *)IMAGE_A_START_ADD))
 
 /*********************************************************************
  * GLOBAL TYPEDEFS
@@ -38,9 +39,6 @@ __attribute__((aligned(8))) uint8_t block_buf[16];
  */
 void SwitchImageFlag(uint8_t new_flag)
 {
-    uint16_t i;
-    uint32_t ver_flag;
-
     /* 读取第一块 */
     FLASH_ROM_READ(OTA_DATAFLASH_ADD, (uint32_t *)&block_buf[0], 4);
 
@@ -61,26 +59,26 @@ void SwitchImageFlag(uint8_t new_flag)
  *
  * @return  none
  */
-void jump_APP(void)
+void JumpToApp(void)
 {
     if(CurrImageFlag == IMAGE_IAP_FLAG)
     {
-        __attribute__((aligned(8))) uint8_t flash_Data[1024];
-
-        uint8_t i;
+        uint32_t i;
+        FlashUnlock();
         FLASH_ROM_ERASE(IMAGE_A_START_ADD, IMAGE_A_SIZE);
         for(i = 0; i < IMAGE_A_SIZE / 1024; i++)
         {
-            FLASH_ROM_READ(IMAGE_B_START_ADD + (i * 1024), flash_Data, 1024);
-            FLASH_ROM_WRITE(IMAGE_A_START_ADD + (i * 1024), flash_Data, 1024);
+            FLASH_ROM_READ(IMAGE_B_START_ADD + (i * 1024), flash_data, 1024);
+            FLASH_ROM_WRITE(IMAGE_A_START_ADD + (i * 1024), flash_data, 1024);
         }
         SwitchImageFlag(IMAGE_A_FLAG);
         // 销毁备份代码
         FLASH_ROM_ERASE(IMAGE_B_START_ADD, IMAGE_A_SIZE);
+        FlashLock();
     }
     PRINT("jumpApp\n" );
     mDelaymS(100);
-    jumpApp();
+    APP_ENTRY();
 }
 
 /*********************************************************************
@@ -92,10 +90,10 @@ void jump_APP(void)
  */
 void ReadImageFlag(void)
 {
-    OTADataFlashInfo_t p_image_flash;
+    OTADataFlashInfo_t image_flash;
 
-    FLASH_ROM_READ(OTA_DATAFLASH_ADD, &p_image_flash, 4);
-    CurrImageFlag = p_image_flash.ImageFlag;
+    FLASH_ROM_READ(OTA_DATAFLASH_ADD, &image_flash, 4);
+    CurrImageFlag = image_flash.ImageFlag;
 
     /* 程序第一次执行，或者没有更新过，以后更新后在擦除DataFlash */
     if((CurrImageFlag != IMAGE_A_FLAG) && (CurrImageFlag != IMAGE_B_FLAG) && (CurrImageFlag != IMAGE_IAP_FLAG))
@@ -115,6 +113,7 @@ void ReadImageFlag(void)
  */
 int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);
@@ -129,7 +128,7 @@ int main(void)
     UART_DefInit();
 #endif
     ReadImageFlag();
-    jump_APP();
+    JumpToApp();
 }
 
 /******************************** endfile @ main ******************************/

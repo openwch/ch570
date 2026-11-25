@@ -116,10 +116,10 @@ typedef FAT_DIR_INFO *PX_FAT_DIR_INFO;
 /*  读   藏   统   标   录   档            */
 /* 文件时间 UINT16 */
 /* Time = (Hour<<11) + (Minute<<5) + (Second>>1) */
-#define MAKE_FILE_TIME( h, m, s )	( (h<<11) + (m<<5) + (s>>1) )	/* 生成指定时分秒的文件时间数据 */
+#define MAKE_FILE_TIME( h, m, s )	( ((h)<<11) + ((m)<<5) + ((s)>>1) )	/* 生成指定时分秒的文件时间数据 */
 /* 文件日期 UINT16 */
 /* Date = ((Year-1980)<<9) + (Month<<5) + Day */
-#define MAKE_FILE_DATE( y, m, d )	( ((y-1980)<<9) + (m<<5) + d )	/* 生成指定年月日的文件日期数据 */
+#define MAKE_FILE_DATE( y, m, d )	( (((y)-1980)<<9) + ((m)<<5) + (d) )	/* 生成指定年月日的文件日期数据 */
 
 /* 文件名 */
 #define PATH_WILDCARD_CHAR		0x2A	/* 路径名的通配符 '*' */

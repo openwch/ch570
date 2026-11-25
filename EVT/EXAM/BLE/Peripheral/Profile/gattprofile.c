@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : gattprofile.C
+ * File Name          : gattprofile.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
@@ -34,27 +34,27 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-// Simple GATT Profile Service UUID: 0xFFF0
+// Simple GATT Profile Service UUID: 0xFFE0
 const uint8_t simpleProfileServUUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_SERV_UUID), HI_UINT16(SIMPLEPROFILE_SERV_UUID)};
 
-// Characteristic 1 UUID: 0xFFF1
+// Characteristic 1 UUID: 0xFFE1
 const uint8_t simpleProfilechar1UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR1_UUID), HI_UINT16(SIMPLEPROFILE_CHAR1_UUID)};
 
-// Characteristic 2 UUID: 0xFFF2
+// Characteristic 2 UUID: 0xFFE2
 const uint8_t simpleProfilechar2UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR2_UUID), HI_UINT16(SIMPLEPROFILE_CHAR2_UUID)};
 
-// Characteristic 3 UUID: 0xFFF3
+// Characteristic 3 UUID: 0xFFE3
 const uint8_t simpleProfilechar3UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR3_UUID), HI_UINT16(SIMPLEPROFILE_CHAR3_UUID)};
 
-// Characteristic 4 UUID: 0xFFF4
+// Characteristic 4 UUID: 0xFFE4
 const uint8_t simpleProfilechar4UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR4_UUID), HI_UINT16(SIMPLEPROFILE_CHAR4_UUID)};
 
-// Characteristic 5 UUID: 0xFFF5
+// Characteristic 5 UUID: 0xFFE5
 const uint8_t simpleProfilechar5UUID[ATT_BT_UUID_SIZE] = {
     LO_UINT16(SIMPLEPROFILE_CHAR5_UUID), HI_UINT16(SIMPLEPROFILE_CHAR5_UUID)};
 
@@ -110,7 +110,7 @@ static uint8_t simpleProfileChar3UserDesp[] = "Characteristic 3\0";
 static uint8_t simpleProfileChar4Props = GATT_PROP_NOTIFY;
 
 // Characteristic 4 Value
-static uint8_t simpleProfileChar4[1] = {0};
+static uint8_t simpleProfileChar4[SIMPLEPROFILE_CHAR4_LEN] = {0};
 
 // Simple Profile Characteristic 4 Configuration Each client has its own
 // instantiation of the Client Characteristic Configuration. Reads of the
@@ -357,9 +357,9 @@ bStatus_t SimpleProfile_SetParameter(uint8_t param, uint8_t len, void *value)
     switch(param)
     {
         case SIMPLEPROFILE_CHAR1:
-            if(len == SIMPLEPROFILE_CHAR1_LEN)
+            if(len <= SIMPLEPROFILE_CHAR1_LEN)
             {
-                tmos_memcpy(simpleProfileChar1, value, SIMPLEPROFILE_CHAR1_LEN);
+                tmos_memcpy(simpleProfileChar1, value, len);
             }
             else
             {
@@ -368,9 +368,9 @@ bStatus_t SimpleProfile_SetParameter(uint8_t param, uint8_t len, void *value)
             break;
 
         case SIMPLEPROFILE_CHAR2:
-            if(len == SIMPLEPROFILE_CHAR2_LEN)
+            if(len <= SIMPLEPROFILE_CHAR2_LEN)
             {
-                tmos_memcpy(simpleProfileChar2, value, SIMPLEPROFILE_CHAR2_LEN);
+                tmos_memcpy(simpleProfileChar2, value, len);
             }
             else
             {
@@ -379,9 +379,9 @@ bStatus_t SimpleProfile_SetParameter(uint8_t param, uint8_t len, void *value)
             break;
 
         case SIMPLEPROFILE_CHAR3:
-            if(len == SIMPLEPROFILE_CHAR3_LEN)
+            if(len <= SIMPLEPROFILE_CHAR3_LEN)
             {
-                tmos_memcpy(simpleProfileChar3, value, SIMPLEPROFILE_CHAR3_LEN);
+                tmos_memcpy(simpleProfileChar3, value, len);
             }
             else
             {
@@ -390,9 +390,9 @@ bStatus_t SimpleProfile_SetParameter(uint8_t param, uint8_t len, void *value)
             break;
 
         case SIMPLEPROFILE_CHAR4:
-            if(len == SIMPLEPROFILE_CHAR4_LEN)
+            if(len <= SIMPLEPROFILE_CHAR4_LEN)
             {
-                tmos_memcpy(simpleProfileChar4, value, SIMPLEPROFILE_CHAR4_LEN);
+                tmos_memcpy(simpleProfileChar4, value, len);
             }
             else
             {
@@ -401,9 +401,9 @@ bStatus_t SimpleProfile_SetParameter(uint8_t param, uint8_t len, void *value)
             break;
 
         case SIMPLEPROFILE_CHAR5:
-            if(len == SIMPLEPROFILE_CHAR5_LEN)
+            if(len <= SIMPLEPROFILE_CHAR5_LEN)
             {
-                tmos_memcpy(simpleProfileChar5, value, SIMPLEPROFILE_CHAR5_LEN);
+                tmos_memcpy(simpleProfileChar5, value, len);
             }
             else
             {
@@ -468,8 +468,7 @@ bStatus_t SimpleProfile_GetParameter(uint8_t param, void *value)
 /*********************************************************************
  * @fn          simpleProfile_Notify
  *
- * @brief       Send a notification containing a heart rate
- *              measurement.
+ * @brief       Send a notification.
  *
  * @param       connHandle - connection handle
  * @param       pNoti - pointer to notification structure
@@ -647,7 +646,7 @@ static bStatus_t simpleProfile_WriteAttrCB(uint16_t connHandle, gattAttribute_t 
                 //Write the value
                 if(status == SUCCESS)
                 {
-                    tmos_memcpy(pAttr->pValue, pValue, SIMPLEPROFILE_CHAR1_LEN);
+                    tmos_memcpy(pAttr->pValue, pValue, len); /* 按实际写入长度拷贝, len小于定长时防止越界读源 */
                     notifyApp = SIMPLEPROFILE_CHAR1;
                 }
                 break;
@@ -670,7 +669,7 @@ static bStatus_t simpleProfile_WriteAttrCB(uint16_t connHandle, gattAttribute_t 
                 //Write the value
                 if(status == SUCCESS)
                 {
-                    tmos_memcpy(pAttr->pValue, pValue, SIMPLEPROFILE_CHAR3_LEN);
+                    tmos_memcpy(pAttr->pValue, pValue, len); /* 按实际写入长度拷贝 */
                     notifyApp = SIMPLEPROFILE_CHAR3;
                 }
                 break;

@@ -24,8 +24,10 @@
  *
  * @return  none
  */
+__HIGH_CODE
 int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_20p);
@@ -41,7 +43,7 @@ int main(void)
 
     UART_DefInit();
     UART_ByteTrigCfg( UART_4BYTE_TRIG );
-    UART_INTCfg( ENABLE,  RB_IER_RECV_RDY );;
+    UART_INTCfg( ENABLE,  RB_IER_RECV_RDY );
     PFIC_EnableIRQ( UART_IRQn );
     PFIC_EnableIRQ( BLEL_IRQn );
     PFIC_EnableIRQ( BLEB_IRQn );

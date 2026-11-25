@@ -50,8 +50,8 @@ extern "C" {
  */
 
 // 读写操作函数回调
-typedef void (*OTAProfileRead_t)(unsigned char paramID);
-typedef void (*OTAProfileWrite_t)(unsigned char paramID, unsigned char *p_data, unsigned char w_len);
+typedef void (*OTAProfileRead_t)(uint8_t paramID);
+typedef void (*OTAProfileWrite_t)(uint8_t paramID, uint8_t *p_data, uint16_t w_len);
 
 typedef struct
 {
@@ -67,7 +67,7 @@ bStatus_t OTAProfile_AddService(uint32_t services);
 
 bStatus_t OTAProfile_RegisterAppCBs(OTAProfileCBs_t *appCallbacks);
 
-bStatus_t OTAProfile_SendData(unsigned char paramID, unsigned char *p_data, unsigned char send_len);
+bStatus_t OTAProfile_SendData(uint8_t paramID, uint8_t *p_data, uint8_t send_len);
 
 /*********************************************************************
 *********************************************************************/

@@ -244,16 +244,41 @@ uint8_t CtrlClearEndpStall(uint8_t endp);
  *
  * @return  ERR_SUCCESS     成功
  */
-uint8_t CtrlSetUsbIntercace(uint8_t cfg);
+uint8_t CtrlSetUsbInterface(uint8_t cfg);
 
 /**
  * @brief   USB主机功能初始化
  */
 void USB_HostInit(void);
-uint8_t EnumAllHubPort(void);// 枚举所有ROOT-HUB端口下外部HUB后的二级USB设备
-void SelectHubPort(uint8_t HubPortIndex); // HubPortIndex=0选择操作指定的ROOT-HUB端口,否则选择操作指定的ROOT-HUB端口的外部HUB的指定端口
-uint16_t SearchTypeDevice(uint8_t type); // 在ROOT-HUB以及外部HUB各端口上搜索指定类型的设备所在的端口号,输出端口号为0xFFFF则未搜索到.
-uint8_t SETorOFFNumLock(uint8_t *buf); // NumLock的点灯判断
+/**
+ * @brief   枚举所有 ROOT-HUB 端口下外部 HUB 后的二级 USB 设备。
+ */
+uint8_t EnumAllHubPort(void);
+
+/**
+ * @brief   选择操作的 HUB 端口。
+ *
+ * @param   HubPortIndex    - 0 表示操作 ROOT-HUB 端口，其他值表示操作对应外部 HUB 的指定端口。
+ */
+void SelectHubPort(uint8_t HubPortIndex);
+
+/**
+ * @brief   在 ROOT-HUB 及外部 HUB 各端口上搜索指定类型的设备。
+ *
+ * @param   type    - 设备类型。
+ *
+ * @return  设备所在的端口号，0xFFFF 表示未搜索到。
+ */
+uint16_t SearchTypeDevice(uint8_t type);
+
+/**
+ * @brief   NumLock 点灯判断。
+ *
+ * @param   buf - 数据缓冲区。
+ *
+ * @return  状态。
+ */
+uint8_t SETorOFFNumLock(uint8_t *buf);
 
 /*************************************************************/
 

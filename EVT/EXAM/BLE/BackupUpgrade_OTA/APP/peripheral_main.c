@@ -20,7 +20,7 @@
 #include "OTAprofile.h"
 
 /* 记录当前的Image */
-unsigned char CurrImageFlag = 0xff;
+uint8_t CurrImageFlag = 0xff;
 
 /*********************************************************************
  * GLOBAL TYPEDEFS
@@ -85,6 +85,7 @@ void Main_Circulation()
  */
 int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);

@@ -90,12 +90,7 @@ void HAL_KeyPoll(void);
  *
  * @param   cback - pointer to the CallBack function
  */
-void HalKeyConfig(const halKeyCBack_t cback);
-
-/**
- * @brief   Read the Key callback
- */
-void HalKeyCallback(uint8_t keys);
+void HalKeyConfig(halKeyCBack_t cback);
 
 /**
  * @brief   Read the Key status

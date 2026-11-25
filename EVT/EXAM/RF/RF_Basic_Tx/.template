@@ -1,0 +1,16 @@
+Mcu Type=CH570/2
+Address=0x00000000
+Target Path=obj/RF_Basic_Tx.hex
+Erase All=true
+Program=true
+Verify=true
+Reset=true
+
+Vendor=WCH
+Link=WCH-Link
+Toolchain=RISC-V
+Series=CH572
+RTOS=NoneOS
+MCU=CH572D
+Description=
+PeripheralVersion=1.3

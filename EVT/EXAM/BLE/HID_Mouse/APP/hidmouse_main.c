@@ -1,5 +1,5 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : main.c
+ * File Name          : hidmouse_main.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2020/08/06
@@ -52,6 +52,7 @@ void Main_Circulation()
  */
 int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);

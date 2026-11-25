@@ -12,7 +12,7 @@
 #include "iap.h"
 
 /* 更新权限，必须先擦除后，且擦除地址需要和APP对应地址一致才可赋予更新权限 */
-uint8_t g_update_permition = 0;
+uint8_t g_update_permission = 0;
 
 uint8_t iap_rec_data_state = IAP_DATA_REC_STATE_WAIT_SOP1, all_data_rec_cnt = 0, part_rec_cnt = 0, uart_rec_sign = 0;
 
@@ -26,8 +26,6 @@ uint32_t g_flash_write_ptr = 0;
 
 uint32_t g_tcnt;
 
-uint32_t g_addr;
-
 __attribute__((aligned(4)))   uint8_t iap_rsp_data[6] = {IAP_DATA_SOP1, IAP_DATA_SOP2, 0, 0, IAP_DATA_EOP1, IAP_DATA_EOP2};
 
 /*********************************************************************
@@ -40,7 +38,7 @@ __attribute__((aligned(4)))   uint8_t iap_rsp_data[6] = {IAP_DATA_SOP1, IAP_DATA
  * @return  None.
  */
 __attribute__((section(".highcode")))
-void Main_Circulation()
+void Main_Circulation(void)
 {
     while (1)
     {
@@ -226,7 +224,7 @@ void Main_Circulation()
                     /* 写入命令 */
                     case CMD_IAP_PROM:
                         /* 判断是否先擦除过芯片 */
-                        if (g_update_permition == 1)
+                        if (g_update_permission == 1)
                         {
                             if (iap_rec_data.program.len == 0)
                             {
@@ -273,11 +271,12 @@ void Main_Circulation()
                     case CMD_IAP_ERASE:
                         if (iap_rec_data.erase.addr == APP_CODE_START_ADDR)
                         {
+                            FlashUnlock();
                             /* 如果有特殊需求，可以修改擦除的长度，将特殊需求的那一部分flash排除在外 */
                             if (FLASH_ROM_ERASE(APP_CODE_START_ADDR, APP_CODE_END_ADDR - APP_CODE_START_ADDR) == 0)
                             {
                                 /* 起始地址正确，赋予更新权限，否则认为失败 */
-                                g_update_permition = 1;
+                                g_update_permission = 1;
                                 /* 计数清零，flash写指针重置 */
                                 g_buf_write_ptr = 0;
                                 g_flash_write_ptr = APP_CODE_START_ADDR;
@@ -319,7 +318,6 @@ void Main_Circulation()
                     case CMD_IAP_END:
                         /*结束升级，复位USB，跳转到app*/
                         R8_USB_CTRL = RB_UC_RESET_SIE;
-                        R16_PIN_ALTERNATE &= ~(RB_UDP_PU_EN | RB_PIN_USB_EN);
                         DelayMs(10);
                         jumpApp();
                         break;
@@ -332,7 +330,7 @@ void Main_Circulation()
                     if (iap_rsp_data[2] != 0)
                     {
                         /* 校验和通过，由于其他错误出错后，清空更新权限，想要更新，按步骤重新开始 */
-                        g_update_permition = 0;
+                        g_update_permission = 0;
                     }
                 }
                 else

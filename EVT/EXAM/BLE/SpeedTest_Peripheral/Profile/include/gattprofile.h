@@ -30,7 +30,7 @@ extern "C" {
 #define SIMPLEPROFILE_CHAR2         1           // RW uint8_t - Profile Characteristic 2 value
 #define SIMPLEPROFILE_CHAR3         2           // RW uint8_t - Profile Characteristic 3 value
 #define SIMPLEPROFILE_CHAR4         3           // RW uint8_t - Profile Characteristic 4 value
-#define SIMPLEPROFILE_CHAR5         4           // RW uint8_t - Profile Characteristic 4 value
+#define SIMPLEPROFILE_CHAR5         4           // RW uint8_t - Profile Characteristic 5 value
 
 // Simple Profile Service UUID
 #define SIMPLEPROFILE_SERV_UUID     0xFFE0
@@ -45,7 +45,9 @@ extern "C" {
 // Simple Keys Profile Services bit fields
 #define SIMPLEPROFILE_SERVICE       0x00000001
 
-// Length of characteristic in bytes ( Default MTU is 23 )
+// Length of characteristic in bytes ( Default MTU (max len) is 23 )
+// CHAR1 is a speed-test data pump: keep the stored value 1 byte (12K RAM),
+// the accepted write length is validated in simpleProfile_WriteAttrCB
 #define SIMPLEPROFILE_CHAR1_LEN     1
 #define SIMPLEPROFILE_CHAR2_LEN     1
 #define SIMPLEPROFILE_CHAR3_LEN     1
@@ -104,7 +106,7 @@ extern bStatus_t SimpleProfile_RegisterAppCBs(simpleProfileCBs_t *appCallbacks);
  *          data type (example: data type of uint16_t will be cast to
  *          uint16_t pointer).
  */
-extern bStatus_t SimpleProfile_SetParameter(uint8_t param, uint8_t len, void *value);
+extern bStatus_t SimpleProfile_SetParameter(uint8_t param, uint16_t len, void *value);
 
 /*
  * SimpleProfile_GetParameter - Get a Simple GATT Profile parameter.

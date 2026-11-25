@@ -105,7 +105,7 @@ CMP_IRQHandler:
 I2C_IRQHandler:
 PWMX_IRQHandler:
 KEYSCAN_IRQHandler:
-ENDOCE_IRQHandler:
+ENCODER_IRQHandler:
 WDOG_BAT_IRQHandler: 
 1:  
 	j 1b
@@ -161,7 +161,7 @@ handle_reset:
 	li t0, 0x25
 	csrw 0xbc0, t0
 	/* 打开嵌套中断、硬件压栈功能 */
-	li t0, 0x3
+	li t0, 0x7
 	csrw 0x804, t0
 	li t0, 0x1
 	csrw 0xbc1, t0

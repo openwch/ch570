@@ -79,8 +79,8 @@ typedef enum
 
 #define BEGYEAR                   2020
 #define IsLeapYear(yr)            (!((yr) % 400) || (((yr) % 100) && !((yr) % 4)))
-#define YearLength(yr)            (IsLeapYear(yr) ? 366 : 365)
-#define monthLength(lpyr, mon)    (((mon) == 1) ? (28 + (lpyr)) : (((mon) > 6) ? (((mon) & 1) ? 31 : 30) : (((mon) & 1) ? 30 : 31)))
+#define YearLength(yr)            (IsLeapYear(yr) ? 366u : 365u)
+#define monthLength(lpyr, mon)    (((mon) == 1) ? (28u + (lpyr)) : (((mon) > 6) ? (((mon) & 1) ? 31u : 30u) : (((mon) & 1) ? 30u : 31u)))
 
 /**
  * @brief  the total number of cycles captured by the oscillator define
@@ -196,7 +196,7 @@ uint32_t RTC_GetCycleLSI(void);
 /**
  * @brief   RTC定时模式配置（注意定时基准固定为32768Hz）
  *
- * @param   t   - refer to RTC_TMRCycTypeDef
+ * @param   cyc - 相对当前时间的触发间隔时间，基于LSI时钟周期数
  */
 void RTC_TRIGFunCfg(uint32_t cyc);
 

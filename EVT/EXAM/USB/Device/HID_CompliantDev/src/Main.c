@@ -30,14 +30,14 @@ const uint8_t HIDDescr[] = {  0x06, 0x00,0xff,
                               0x09, 0x01,
                               0xa1, 0x01,                                                   //集合开始
                               0x09, 0x02,                                                   //Usage Page  用法
-                              0x15, 0x00,                                                   //Logical  Minimun
-                              0x26, 0x00,0xff,                                              //Logical  Maximun
+                              0x15, 0x00,                                                   //Logical  Minimum
+                              0x26, 0x00,0xff,                                              //Logical  Maximum
                               0x75, 0x08,                                                   //Report Size
                               0x95, 0x40,                                                   //Report Count
                               0x81, 0x06,                                                   //Input
                               0x09, 0x02,                                                   //Usage Page  用法
-                              0x15, 0x00,                                                   //Logical  Minimun
-                              0x26, 0x00,0xff,                                              //Logical  Maximun
+                              0x15, 0x00,                                                   //Logical  Minimum
+                              0x26, 0x00,0xff,                                              //Logical  Maximum
                               0x75, 0x08,                                                   //Report Size
                               0x95, 0x40,                                                   //Report Count
                               0x91, 0x06,                                                   //Output
@@ -157,7 +157,7 @@ void USB_DevTransProcess(void)  //USB设备传输中断处理
             if((pSetupReqPak->bRequestType & USB_REQ_TYP_MASK) != USB_REQ_TYP_STANDARD) //判断命令的类型，如果不是标准请求，进if语句
             {
                 /* 非标准请求 */
-                /* 其它请求,如类请求，产商请求等 */
+                /* 其它请求,如类请求，厂商请求等 */
                 if(pSetupReqPak->bRequestType & 0x40)   //取得命令中的某一位，判断是否为0，不为零进if语句
                 {
                     /* 厂商请求 */
@@ -219,7 +219,7 @@ void USB_DevTransProcess(void)  //USB设备传输中断处理
                                 {
                                     /* 选择接口 */
                                     case 0:
-                                        pDescr = (uint8_t *)(&MyCfgDescr[18]);  //接口1的类描述符存放位置，待发送
+                                        pDescr = (uint8_t *)(&MyCfgDescr[18]);  //接口0的类描述符存放位置，待发送
                                         len = 9;
                                         break;
 
@@ -238,7 +238,7 @@ void USB_DevTransProcess(void)  //USB设备传输中断处理
                                     len = sizeof(HIDDescr);
                                 }
                                 else
-                                    len = 0xff; //本程序只有2个接口，这句话正常不可能执行
+                                    len = 0xff; //本程序只有1个接口，这句话正常不可能执行
                             }
                             break;
 
@@ -455,8 +455,7 @@ void USB_DevTransProcess(void)  //USB设备传输中断处理
  *
  * @brief   上报HID数据
  *
- * @return  0：成功
- *          1：出错
+ * @return  none
  */
 void DevHIDReport(uint8_t data0,uint8_t data1,uint8_t data2,uint8_t data3)
 {
@@ -506,13 +505,15 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint8_t s;
+
+    FlashLock();
     HSECFG_Capacitance(HSECap_18p);
     SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
 
-    DebugInit();        //配置串口1用来prinft来debug
+    DebugInit();        //配置串口1用来printf来debug
     printf("start\n");
 
     pEP0_RAM_Addr = EP0_Databuf;    //配置缓存区64字节。
@@ -588,3 +589,4 @@ void USB_IRQHandler(void) /* USB中断服务程序,使用寄存器组1 */
 {
     USB_DevTransProcess();
 }
+

@@ -260,8 +260,8 @@ void SPI_MasterRecv(uint8_t *pbuf, uint16_t len)
 void SPI_MasterDMATrans(uint8_t *pbuf, uint16_t len)
 {
     R8_SPI_CTRL_MOD &= ~RB_SPI_FIFO_DIR;
-    R16_SPI_DMA_BEG = (uint32_t)pbuf;
-    R16_SPI_DMA_END = (uint32_t)(pbuf + len);
+    R16_SPI_DMA_BEG = (uint16_t)(uint32_t)pbuf;
+    R16_SPI_DMA_END = (uint16_t)(uint32_t)(pbuf + len);
     R16_SPI_TOTAL_CNT = len;
     R8_SPI_INT_FLAG = RB_SPI_IF_CNT_END | RB_SPI_IF_DMA_END;
     R8_SPI_CTRL_CFG |= RB_SPI_DMA_ENABLE;
@@ -282,8 +282,8 @@ void SPI_MasterDMATrans(uint8_t *pbuf, uint16_t len)
 void SPI_MasterDMARecv(uint8_t *pbuf, uint16_t len)
 {
     R8_SPI_CTRL_MOD |= RB_SPI_FIFO_DIR;
-    R16_SPI_DMA_BEG = (uint32_t)pbuf;
-    R16_SPI_DMA_END = (uint32_t)(pbuf + len);
+    R16_SPI_DMA_BEG = (uint16_t)(uint32_t)pbuf;
+    R16_SPI_DMA_END = (uint16_t)(uint32_t)(pbuf + len);
     R16_SPI_TOTAL_CNT = len;
     R8_SPI_INT_FLAG = RB_SPI_IF_CNT_END | RB_SPI_IF_DMA_END;
     R8_SPI_CTRL_CFG |= RB_SPI_DMA_ENABLE;

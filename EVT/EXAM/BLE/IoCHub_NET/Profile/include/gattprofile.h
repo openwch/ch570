@@ -45,7 +45,7 @@ extern "C" {
 // Simple Keys Profile Services bit fields
 #define SIMPLEPROFILE_SERVICE       0x00000001
 
-// Length of characteristic in bytes ( Default MTU is 23 )
+// Length of characteristic in bytes ( Default MTU (max len) is 23 )
 #define SIMPLEPROFILE_CHAR1_LEN     1
 #define SIMPLEPROFILE_CHAR2_LEN     1
 #define SIMPLEPROFILE_CHAR3_LEN     1

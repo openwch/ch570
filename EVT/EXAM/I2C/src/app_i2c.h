@@ -76,7 +76,7 @@ struct i2c_slave_cb {
 void i2c_app_init(uint8_t address);
 
 /**
- * @brief   I2C slave user callback function regiester.
+ * @brief   I2C slave user callback function register.
  * 
  * @param cb    Pointer to user callback function.
  */

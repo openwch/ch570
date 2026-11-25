@@ -43,6 +43,8 @@ void UART_BaudRateCfg(uint32_t baudrate)
 {
     uint32_t x;
 
+    if(baudrate == 0)  return;
+
     x = 10 * GetSysClock() / 8 / baudrate;
     x = (x + 5) / 10;
     R16_UART_DL = (uint16_t)x;

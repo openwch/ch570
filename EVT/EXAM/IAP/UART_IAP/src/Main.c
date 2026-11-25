@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2020/08/06
- * Description        : FALSH读写例程
+ * Description        : UART IAP例程
  *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 
@@ -22,10 +22,9 @@ IAPDataFlashInfo_t p_image_flash;
  *
  * @return  none
  */
-int main()
+int main(void)
 {
-    uint16_t i;
-    uint8_t  s;
+    FlashLock();
 
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;

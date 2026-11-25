@@ -24,9 +24,11 @@ uint8_t trigB;
  * @return  none
  */
 __HIGH_CODE
-int main()
+int main(void)
 {
     uint8_t len;
+
+    FlashLock();
 
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
@@ -41,7 +43,7 @@ int main()
     UART_DefInit();
 
 #if 1 // 测试串口发送字符串
-    UART_SendString(TxBuff, sizeof(TxBuff));
+    UART_SendString(TxBuff, (sizeof(TxBuff)-1));
 #endif
 
 #if 1 // 查询方式：接收数据后发送出去

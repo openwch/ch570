@@ -68,7 +68,7 @@ extern "C" {
 #define HID_EXT_REPORT_REF_LEN            2     // External Report Reference Descriptor
 
 // HID Keyboard/Keypad Usage IDs (subset of the codes available in the USB HID Usage Tables spec)
-#define HID_KEYBOARD_RESERVED             0     // 0x00 - No event inidicated
+#define HID_KEYBOARD_RESERVED             0     // 0x00 - No event indicated
 #define HID_KEYBOARD_A                    4     // 0x04 - Keyboard a and A
 #define HID_KEYBOARD_B                    5     // 0x05 - Keyboard b and B
 #define HID_KEYBOARD_C                    6     // 0x06 - Keyboard c and C
@@ -156,7 +156,7 @@ extern "C" {
 #define HID_KEYBPAD_1                     89    // 0x59 - Keypad 1 and End
 #define HID_KEYBPAD_2                     90    // 0x5A - Keypad 2 and Down Arrow
 #define HID_KEYBPAD_3                     91    // 0x5B - Keypad 3 and PageDn
-#define HID_KEYBPAD_4                     92    // 0x5C - Keypad 4 and Lfet Arrow
+#define HID_KEYBPAD_4                     92    // 0x5C - Keypad 4 and Left Arrow
 #define HID_KEYBPAD_5                     93    // 0x5D - Keypad 5
 #define HID_KEYBPAD_6                     94    // 0x5E - Keypad 6 and Right Arrow
 #define HID_KEYBPAD_7                     95    // 0x5F - Keypad 7 and Home
@@ -167,11 +167,11 @@ extern "C" {
 #define HID_KEYBOARD_MUTE                 127   // 0x7F - Keyboard Mute
 #define HID_KEYBOARD_VOLUME_UP            128   // 0x80 - Keyboard Volume up
 #define HID_KEYBOARD_VOLUME_DOWN          129   // 0x81 - Keyboard Volume down
-#define HID_KEYBOARD_LEFT_CTRL            224   // 0xE0 - Keyboard LeftContorl
+#define HID_KEYBOARD_LEFT_CTRL            224   // 0xE0 - Keyboard LeftControl
 #define HID_KEYBOARD_LEFT_SHIFT           225   // 0xE1 - Keyboard LeftShift
 #define HID_KEYBOARD_LEFT_ALT             226   // 0xE2 - Keyboard LeftAlt
 #define HID_KEYBOARD_LEFT_GUI             227   // 0xE3 - Keyboard LeftGUI
-#define HID_KEYBOARD_RIGHT_CTRL           228   // 0xE4 - Keyboard LeftContorl
+#define HID_KEYBOARD_RIGHT_CTRL           228   // 0xE4 - Keyboard LeftControl
 #define HID_KEYBOARD_RIGHT_SHIFT          229   // 0xE5 - Keyboard LeftShift
 #define HID_KEYBOARD_RIGHT_ALT            230   // 0xE6 - Keyboard LeftAlt
 #define HID_KEYBOARD_RIGHT_GUI            231   // 0xE7 - Keyboard RightGUI

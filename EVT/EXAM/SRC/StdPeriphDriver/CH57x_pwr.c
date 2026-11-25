@@ -55,11 +55,11 @@ void PWR_PeriphClkCfg(FunctionalState s, uint16_t perph)
  *                    RB_SLP_GPIO_WAKE  -  GPIO 为唤醒源
  *                    RB_SLP_BAT_WAKE   -  BAT 为唤醒源
  *                    RB_SLP_GPIO_EDGE_MODE -  GPIO不论上沿还是下沿都能唤醒
- * @param   mode    - refer to WakeUP_ModeypeDef
+ * @param   mode    - refer to WakeUP_ModeTypeDef
  *
  * @return  none
  */
-void PWR_PeriphWakeUpCfg(FunctionalState s, uint8_t perph, WakeUP_ModeypeDef mode)
+void PWR_PeriphWakeUpCfg(FunctionalState s, uint8_t perph, WakeUP_ModeTypeDef mode)
 {
     if(s == DISABLE)
     {
@@ -180,16 +180,19 @@ void LowPower_Halt(void)
     sys_safe_access_disable();
 }
 
-/*******************************************************************************
-* Function Name  : LowPower_Sleep
-* Description    : 低功耗-Sleep模式。
-* Input          : rm:
-                    RB_PWR_RAM12K	-	12K retention SRAM 供电
-                    RB_PWR_EXTEND	-	USB 和 BLE 单元保留区域供电
-                    RB_PWR_XROM   - FlashROM 供电
-                   NULL	-	以上单元都断电
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      LowPower_Sleep
+ *
+ * @brief   低功耗-Sleep模式。
+ *
+ * @param   rm  - 保留供电单元，可取值：
+ *                RB_PWR_RAM12K  - 12K retention SRAM 供电
+ *                RB_PWR_EXTEND  - USB 和 BLE 单元保留区域供电
+ *                RB_PWR_XROM    - FlashROM 供电
+ *                NULL           - 以上单元都断电
+ *
+ * @return  none
+ */
 __HIGH_CODE
 void LowPower_Sleep(uint16_t rm)
 {
@@ -277,7 +280,7 @@ void LowPower_Shutdown(uint16_t rm)
 
     PFIC->SCTLR |= (1 << 2); //deep sleep
 
-    SetSysClock(CLK_SOURCE_HSE_PLL_24MHz);
+    SetSysClock(CLK_SOURCE_HSE_4MHz);
     sys_safe_access_enable();
     R16_POWER_PLAN = RB_PWR_PLAN_EN | rm;
     sys_safe_access_disable();

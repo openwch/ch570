@@ -21,16 +21,16 @@
 
 rfTxBuf_t gTxBuf;
 uint32_t gRfRxCount;
-uint16_t gInterval;
-uint16_t gTimeoutMax;
-uint16_t gTimeout;
-uint16_t gServerData;
+volatile uint16_t gInterval;      /* 以下变量跨中断/主循环上下文访问, 加volatile */
+volatile uint16_t gTimeoutMax;
+volatile uint16_t gTimeout;
+volatile uint16_t gServerData;
 
-uint8_t gTxDataSeq;
-uint8_t gRfStatus;
-uint8_t gBoundStatus;
+volatile uint8_t gTxDataSeq;
+volatile uint8_t gRfStatus;
+volatile uint8_t gBoundStatus;
 uint8_t getDataProbe;
-uint32_t  gRfRxFlag;
+volatile uint32_t  gRfRxFlag;
 rfPackage_t *pPkt_t;
 
 static void rfProcessRx( rfPackage_t *pPkt );
@@ -119,8 +119,10 @@ static void rf_bound( bound_rsp_t *rsp )
     rf_rx_set_phy_type( rsp->phy );
     info.head = 0x55aa;
     info.serverData = gServerData;
+    FlashUnlock();
     FLASH_ROM_ERASE( BOUND_INFO_FLASH_ADDR, 4096 );
     FLASH_ROM_WRITE( BOUND_INFO_FLASH_ADDR,&info,4 );
+    FlashLock();
     
     RF_bound_Flag = 1;
     PRINT("bound success.%x %x\n",rsp->accessaddr,rsp->channel );
@@ -242,6 +244,10 @@ static void rfProcessRx( rfPackage_t *pPkt )
             {
                 typeBufSize len;
 
+                if( pPkt->length < PKT_DATA_OFFSET+1 )
+                {
+                    return; /* 长度字段异常, 防止下溢产生超大长度 */
+                }
                 pPkt_t = pPkt;
                 getDataProbe = 6;
                 {

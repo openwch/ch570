@@ -316,6 +316,9 @@ void CH341RegWrite(uint8_t reg_add,uint8_t reg_val)
       break;
     }
   }
+  if(i == CH341_REG_NUM){
+      return;
+  }
   find_idx = i;
   if(find_flag)
   {
@@ -366,7 +369,7 @@ void CH341RegWrite(uint8_t reg_add,uint8_t reg_val)
       Uart0Para.ParityType = parity_val;
       Uart0Para.DataBits = data_bit_val;
 
-      PRINT("CH341 set para:%d %d %d break:%02x\r\n",data_bit_val,(int)stop_bit_val,parity_val,break_en);
+//      PRINT("CH341 set para:%d %d %d break:%02x\r\n",data_bit_val,(int)stop_bit_val,parity_val,break_en);
 
       //直接设置寄存器
       VENSer0ParaChange = 1;
@@ -537,7 +540,7 @@ void USB_IRQHandler(void)
             gEnd2DataLen = write_buf( pUsbBuf,Ep2Buffer, &data_len );
             if( !data_len )
             {
-                PRINT("why??? l=%d\n ", gEnd2DataLen );
+//                PRINT("why??? l=%d\n ", gEnd2DataLen );
             }
             if( gEnd2DataLen > (USB_BUF_LEN-MAX_PACKET_SIZE) )
             {
@@ -690,12 +693,12 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
         }
         case UIS_TOKEN_OUT | 1:    // endpoint 1# 批量端点下传完成
         {
-          PRINT("usb_out1\n");
+//          PRINT("usb_out1\n");
           len = usb_irq_len[i];
           //Ep1OUTDataBuf
-          for(int i = 0;i<len;i++)
-          PRINT("%02x  ",Ep1OUTDataBuf[i]);
-          PRINT("\n");
+//          for(int i = 0;i<len;i++)
+//          PRINT("%02x  ",Ep1OUTDataBuf[i]);
+//          PRINT("\n");
 
           //CH341的数据下发
           Ep1DataOUTFlag = 1;
@@ -833,7 +836,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                     }
                     Uart0Para.BaudRate = bps;
                     UART_Status = 1;
-                    PRINT("CH341 set bps:%d\r\n",(int)bps);
+//                    PRINT("CH341 set bps:%d\r\n",(int)bps);
                   }
                   else
                   {
@@ -1008,7 +1011,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                       }
                       Uart0Para.BaudRate = bps;
                       UART_Status = 1;
-                      PRINT("set bps:%d\r\n",(int)bps);
+//                      PRINT("set bps:%d\r\n",(int)bps);
                     }
                   }
                   break;
@@ -1018,7 +1021,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                   len = 0;
                   Uart0Para.ioStaus = Ep0Buffer[2];
                   UART_Status = 1;
-                  PRINT("set moden:%x\r\n",Uart0Para.ioStaus);
+//                  PRINT("set moden:%x\r\n",Uart0Para.ioStaus);
                   break;
                 }
                 case DEF_VEN_BUF_CLEAR: //0XB2  /* 清除未完成的数据 */
@@ -1110,10 +1113,10 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                     }
                     case 3:  // 字符串描述符
                     {
-                      PRINT("str %d\r\n",UsbSetupBuf->wValueL);
+//                      PRINT("str %d\r\n",UsbSetupBuf->wValueL);
 #if ( USB_WORK_MODE== USB_VENDOR_MODE)
                       {
-                        PRINT("str %d\r\n",UsbSetupBuf->wValueL);
+//                        PRINT("str %d\r\n",UsbSetupBuf->wValueL);
                         switch(UsbSetupBuf->wValueL)
                         {
                           case 0:  //语言描述符
@@ -1161,7 +1164,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                       }
 #else   //CDC模式
                       {
-                        PRINT("str %d\r\n",UsbSetupBuf->wValueL);
+//                        PRINT("str %d\r\n",UsbSetupBuf->wValueL);
                         switch(UsbSetupBuf->wValueL)
                         {
                           case 0:  //语言描述符
@@ -1230,7 +1233,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                 }
                 case USB_SET_ADDRESS:  //设置地址
                 {
-                  PRINT("SET_ADDRESS:%d\r\n",UsbSetupBuf->wValueL);
+//                  PRINT("SET_ADDRESS:%d\r\n",UsbSetupBuf->wValueL);
                   devinf.gUsbFlag |= DEF_BIT_USB_ADDRESS;
                   devinf.UsbAddress = UsbSetupBuf->wValueL;    // 暂存USB设备地址
 
@@ -1238,7 +1241,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                 }
                 case USB_GET_CONFIGURATION:
                 {
-                  PRINT("GET_CONFIGURATION\r\n");
+//                  PRINT("GET_CONFIGURATION\r\n");
                   Ep0Buffer[0] = devinf.UsbConfig;
                   if ( SetupLen >= 1 ) len = 1;
 
@@ -1246,14 +1249,14 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                 }
                 case USB_SET_CONFIGURATION:
                 {
-                  PRINT("SET_CONFIGURATION\r\n");
+//                  PRINT("SET_CONFIGURATION\r\n");
                   devinf.gUsbFlag |= DEF_BIT_USB_SET_CFG;
                   devinf.UsbConfig = UsbSetupBuf->wValueL;
                   break;
                 }
                 case USB_CLEAR_FEATURE:
                 {
-                  PRINT("CLEAR_FEATURE\r\n");
+//                  PRINT("CLEAR_FEATURE\r\n");
                   len = 0;
                   /* 清除设备 */
                   if( ( UsbSetupBuf->bRequestType & USB_REQ_RECIP_MASK ) == USB_REQ_RECIP_DEVICE )
@@ -1291,14 +1294,14 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                 }
                 case USB_GET_INTERFACE:
                 {
-                  PRINT("GET_INTERFACE\r\n");
+//                  PRINT("GET_INTERFACE\r\n");
                   Ep0Buffer[0] = 0x00;
                   if ( SetupLen >= 1 ) len = 1;
                   break;
                 }
                 case USB_GET_STATUS:
                 {
-                  PRINT("GET_STATUS\r\n");
+//                  PRINT("GET_STATUS\r\n");
                   Ep0Buffer[0] = 0x00;
                   Ep0Buffer[1] = 0x00;
                   if ( SetupLen >= 2 ) len = 2;
@@ -1321,12 +1324,12 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                   case DEF_SET_LINE_CODING: /* SET_LINE_CODING */
                   {
                     uint8_t i;
-                    PRINT("SET_LINE_CODING\r\n");
-                    for(i=0; i<8; i++)
-                    {
-                      PRINT("%02x ",Ep0Buffer[i]);
-                    }
-                    PRINT("\r\n");
+//                    PRINT("SET_LINE_CODING\r\n");
+//                    for(i=0; i<8; i++)
+//                    {
+//                      PRINT("%02x ",Ep0Buffer[i]);
+//                    }
+//                    PRINT("\r\n");
                     if( Ep0Buffer[ 4 ] == 0x00 )
                     {
                       CDCSetSerIdx = 0;
@@ -1345,7 +1348,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                     uint8_t  carrier_sta;
                     uint8_t  present_sta;
                     /* 线路状态 */
-                    PRINT("ctl %02x %02x\r\n",Ep0Buffer[2],Ep0Buffer[3]);
+//                    PRINT("ctl %02x %02x\r\n",Ep0Buffer[2],Ep0Buffer[3]);
                     carrier_sta = Ep0Buffer[2] & (1<<1);   //RTS状态
                     present_sta = Ep0Buffer[2] & (1<<0);   //DTR状态
                     len = 0;
@@ -1353,7 +1356,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                   }
                   default:
                   {
-                    PRINT("CDC ReqCode%x\r\n",SetupReqCode);
+//                    PRINT("CDC ReqCode%x\r\n",SetupReqCode);
                     len = 0xFF;                                       // 操作失败
                     break;
                   }
@@ -1366,7 +1369,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                 {
                   case DEF_GET_LINE_CODING: /* GET_LINE_CODING */
                   {
-                    PRINT("GET_LINE_CODING:%d\r\n",Ep0Buffer[ 4 ]);
+//                    PRINT("GET_LINE_CODING:%d\r\n",Ep0Buffer[ 4 ]);
                     pDescr = Ep0Buffer;
                     len = sizeof( LINE_CODE );
                     ( ( PLINE_CODE )Ep0Buffer )->BaudRate   = Uart0Para.BaudRate;
@@ -1377,7 +1380,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                   }
                   case DEF_SERIAL_STATE:
                   {
-                    PRINT("GET_SERIAL_STATE:%d\r\n",Ep0Buffer[ 4 ]);
+//                    PRINT("GET_SERIAL_STATE:%d\r\n",Ep0Buffer[ 4 ]);
                     //SetupLen 判断总长度
                     len = 2;
                     CDCSetSerIdx = 0;
@@ -1387,7 +1390,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                   }
                   default:
                   {
-                    PRINT("CDC ReqCode%x\r\n",SetupReqCode);
+//                    PRINT("CDC ReqCode%x\r\n",SetupReqCode);
                     len = 0xFF;                                       // 操作失败
                     break;
                   }
@@ -1594,11 +1597,11 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
                   ver_bit = Ep0Buffer[5];
                   data_bit = Ep0Buffer[6];
 
-                  PRINT("LINE_CODING %d %d %d %d %d\r\n",CDCSetSerIdx
-                                       ,(int)set_bps
-                                       ,data_bit
-                                       ,stop_bit
-                                       ,ver_bit);
+//                  PRINT("LINE_CODING %d %d %d %d %d\r\n",CDCSetSerIdx
+//                                       ,(int)set_bps
+//                                       ,data_bit
+//                                       ,stop_bit
+//                                       ,ver_bit);
 
                     Uart0Para.BaudRate = set_bps;
                     Uart0Para.StopBits = stop_bit;
@@ -1894,7 +1897,7 @@ void USB_StatusQuery( void )
             {
                 if( len > 32 )
                 {
-                    PRINT("!!! error usb in l=%d %x\n",len,R8_UEP2_CTRL);
+//                    PRINT("!!! error usb in l=%d %x\n",len,R8_UEP2_CTRL);
                 }
                 R8_UEP2_T_LEN = (uint8_t)len;
                 PFIC_DisableIRQ(USB_IRQn);

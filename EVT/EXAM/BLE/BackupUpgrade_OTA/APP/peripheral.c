@@ -1,10 +1,10 @@
 /********************************** (C) COPYRIGHT *******************************
- * File Name          : Peripheral.C
+ * File Name          : peripheral.c
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2018/12/10
  * Description        : 外设从机应用程序，初始化广播连接参数，然后广播，直至连接主机后，通过自定义服务传输数据
- *********************************************************************************
+ ***************************************S******************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * Attention: This software (modified or not) and binary are used for 
  * microcontroller manufactured by Nanjing Qinheng Microelectronics.
@@ -15,9 +15,9 @@
  */
 #include "CONFIG.h"
 #include "devinfoservice.h"
-#include "GATTprofile.h"
-#include "Peripheral.h"
-#include "OTA.h"
+#include "gattprofile.h"
+#include "peripheral.h"
+#include "ota.h"
 #include "OTAprofile.h"
 
 /*********************************************************************
@@ -157,8 +157,8 @@ static void Peripheral_ProcessTMOSMsg(tmos_event_hdr_t *pMsg);
 static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEvent_t *pEvent);
 static void performPeriodicTask(void);
 static void simpleProfileChangeCB(uint8_t paramID);
-void        OTA_IAPReadDataComplete(unsigned char index);
-void        OTA_IAPWriteData(unsigned char index, unsigned char *p_data, unsigned char w_len);
+void        OTA_IAPReadDataComplete(uint8_t index);
+void        OTA_IAPWriteData(uint8_t index, uint8_t *p_data, uint16_t w_len);
 void        Rec_OTA_IAP_DataDeal(void);
 void        OTA_IAP_SendCMDDealSta(uint8_t deal_status);
 
@@ -419,8 +419,13 @@ static void peripheralStateNotificationCB(gapRole_States_t newState, gapRoleEven
     switch(newState)
     {
         case GAPROLE_STARTED:
+        {
+            uint8_t ownAddr[6];
+            GAPRole_GetParameter(GAPROLE_BD_ADDR, ownAddr);
+            GAP_ConfigDeviceAddr(ADDRTYPE_STATIC, ownAddr);
             PRINT("Initialized..\n");
             break;
+        }
 
         case GAPROLE_ADVERTISING:
             PRINT("Advertising..\n");
@@ -624,7 +629,6 @@ void Rec_OTA_IAP_DataDeal(void)
         /* 编程 */
         case CMD_IAP_PROM:
         {
-            uint32_t i;
             uint8_t  status;
 
             OpParaDataLen = iap_rec_data.program.len;
@@ -635,6 +639,12 @@ void Rec_OTA_IAP_DataDeal(void)
             OpAdd += IMAGE_A_SIZE;
 
             PRINT("IAP_PROM: %08x len:%d \r\n", (int)OpAdd, (int)OpParaDataLen);
+
+            if((OpAdd < IMAGE_B_START_ADD) || ((OpAdd + OpParaDataLen) > IMAGE_IAP_START_ADD))
+            {
+                OTA_IAP_SendCMDDealSta(0xFF);
+                break;
+            }
 
             /* 当前是ImageA，直接编程 */
             status = FLASH_ROM_WRITE(OpAdd, iap_rec_data.program.buf, (uint16_t)OpParaDataLen);
@@ -661,7 +671,8 @@ void Rec_OTA_IAP_DataDeal(void)
 
             PRINT("IAP_ERASE start:%08x num:%d\r\n", (int)OpAdd, (int)EraseBlockNum);
 
-            if(EraseAdd < IMAGE_B_START_ADD || (EraseAdd + (EraseBlockNum - 1) * FLASH_BLOCK_SIZE) > IMAGE_IAP_START_ADD)
+            if((EraseBlockNum == 0) || (EraseAdd < IMAGE_B_START_ADD) ||
+            ((EraseAdd + (EraseBlockNum - 1) * FLASH_BLOCK_SIZE) > IMAGE_IAP_START_ADD))
             {
                 OTA_IAP_SendCMDDealSta(0xFF);
             }
@@ -675,7 +686,6 @@ void Rec_OTA_IAP_DataDeal(void)
         /* 校验 */
         case CMD_IAP_VERIFY:
         {
-            uint32_t i;
             uint8_t  status = 0;
 
             OpParaDataLen = iap_rec_data.verify.len;
@@ -686,6 +696,12 @@ void Rec_OTA_IAP_DataDeal(void)
 
             OpAdd += IMAGE_A_SIZE;
             PRINT("IAP_VERIFY: %08x len:%d \r\n", (int)OpAdd, (int)OpParaDataLen);
+
+            if((OpAdd+OpParaDataLen)>IMAGE_IAP_START_ADD)
+            {
+                OTA_IAP_SendCMDDealSta(0xFF);
+                break;
+            }
 
             /* 当前是ImageA，直接读取ImageB校验 */
             status = FLASH_ROM_VERIFY(OpAdd, iap_rec_data.verify.buf, OpParaDataLen);
@@ -717,7 +733,7 @@ void Rec_OTA_IAP_DataDeal(void)
         }
         case CMD_IAP_INFO:
         {
-            uint8_t send_buf[20];
+            uint8_t send_buf[20] = {0};
 
             PRINT("IAP_INFO \r\n");
 
@@ -761,7 +777,7 @@ void Rec_OTA_IAP_DataDeal(void)
  *
  * @return  none
  */
-void OTA_IAPReadDataComplete(unsigned char index)
+void OTA_IAPReadDataComplete(uint8_t index)
 {
     PRINT("OTA Send Comp \r\n");
 }
@@ -777,14 +793,18 @@ void OTA_IAPReadDataComplete(unsigned char index)
  *
  * @return  none
  */
-void OTA_IAPWriteData(unsigned char index, unsigned char *p_data, unsigned char w_len)
+void OTA_IAPWriteData(uint8_t index, uint8_t *p_data, uint16_t w_len) /* 参数改为16位, 避免长包截断成8位 */
 {
-    unsigned char  rec_len;
-    unsigned char *rec_data;
+    uint8_t  rec_len;
+    uint8_t *rec_data;
 
+    if(w_len > sizeof(iap_rec_data))
+    {
+        w_len = sizeof(iap_rec_data); /* 防止写入长度超过命令缓冲区 */
+    }
     rec_len = w_len;
     rec_data = p_data;
-    tmos_memcpy((unsigned char *)&iap_rec_data, rec_data, rec_len);
+    tmos_memcpy((uint8_t *)&iap_rec_data, rec_data, rec_len);
     Rec_OTA_IAP_DataDeal();
 }
 

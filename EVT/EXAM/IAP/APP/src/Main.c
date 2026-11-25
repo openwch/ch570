@@ -35,10 +35,12 @@ void DebugInit(void)
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint16_t i = 0;
     uint8_t  s = 0;
+
+    FlashLock();
 
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
@@ -51,7 +53,9 @@ int main()
     DebugInit();
     PRINT("Start @ChipID=%02x\n", R8_CHIP_ID);
     /* app程序必须执行该语句，保证app更新失败时，下次依然运行IAP */
+    FlashUnlock();
     SwitchImageFlag(FLAG_USER_CALL_APP);
+    FlashLock();
 
     GPIOA_ModeCfg(GPIO_Pin_4, GPIO_ModeIN_PU);
     while (1)

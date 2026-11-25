@@ -23,7 +23,7 @@
  * @return  None.
  */
 __attribute__((section(".highcode")))
-void Main_Circulation()
+void Main_Circulation(void)
 {
     uint16_t j = 0;
     while (1)
@@ -49,6 +49,47 @@ void Main_Circulation()
 
 IAPDataFlashInfo_t p_image_flash;
 
+__HIGH_CODE
+void My_SysClockInit(void)
+{
+    uint16_t clk_sys_cfg;
+    uint8_t i;
+    uint8_t x32M_c;
+
+    if(!(R8_HFCK_PWR_CTRL & RB_CLK_XT32M_PON))
+    {
+        x32M_c = R8_XT32M_TUNE;
+        sys_safe_access_enable();
+        R8_XT32M_TUNE |= 0x03;
+        R8_HFCK_PWR_CTRL |= RB_CLK_XT32M_PON;
+        sys_safe_access_disable();
+        clk_sys_cfg = R8_CLK_SYS_CFG;
+        sys_safe_access_enable();
+        R8_CLK_SYS_CFG |= 0xC0;
+        sys_safe_access_disable();
+        for(i=0; i<9; i++)
+        {
+            __nop();
+        }
+        sys_safe_access_enable();
+        R8_CLK_SYS_CFG = clk_sys_cfg;
+        R8_XT32M_TUNE = x32M_c;
+        sys_safe_access_disable();
+    }
+
+    sys_safe_access_enable();
+    R8_HFCK_PWR_CTRL |= RB_CLK_PLL_PON;
+    R8_FLASH_CFG = 0X01;
+    R8_FLASH_SCK |= 1<<4; //50M
+    sys_safe_access_disable();
+
+    sys_safe_access_enable();
+    R8_SLP_POWER_CTRL |= 0x40;
+    R8_CLK_SYS_CFG = CLK_SOURCE_HSE_PLL_100MHz;
+    R32_MISC_CTRL |= (5<<3)|(5<<6)|(3<<25);
+    sys_safe_access_disable();
+}
+
 /*********************************************************************
  * @fn      main
  *
@@ -56,15 +97,17 @@ IAPDataFlashInfo_t p_image_flash;
  *
  * @return  none
  */
-int main()
+int main(void)
 {
     uint16_t i;
     uint8_t  s;
 
+    FlashLock();
+
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance(HSECap_18p);
-    SetSysClock(CLK_SOURCE_HSE_PLL_100MHz);
+    My_SysClockInit();
 
 #if USE_FLASHROM_FLAG
     FLASH_ROM_READ(IAP_FLAG_DATAFLASH_ADD, &p_image_flash, 4);

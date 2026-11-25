@@ -18,8 +18,8 @@
 #define THIS_ENDP0_SIZE         64
 #define MAX_PACKET_SIZE         64
 
-#define USB_CDC_MODE      0
-#define USB_VENDOR_MODE   1
+#define USB_CDC_MODE            0
+#define USB_VENDOR_MODE         1
 
 /* USB工作模式 */
 UINT8 usb_work_mode = USB_CDC_MODE; //USB_VENDOR_MODE;
@@ -215,7 +215,7 @@ typedef struct _USB_SETUP_REQ_ {
     UINT8 wLengthH;
 } USB_SETUP_REQ_t;
 
-#define UsbSetupBuf     ((USB_SETUP_REQ_t *)Ep0Buffer) //USB_SETUP_REQ_t USB_SETUP_REQ_t
+#define UsbSetupBuf     ((USB_SETUP_REQ_t *)Ep0Buffer)
 
 /* USB缓存定义，所有端点全部定义 */
 /* 端点1 -- IN状态 */
@@ -566,7 +566,7 @@ UINT8 Ep4DataOUTFlag = 0;
 #define DEF_VEN_UART_M_OUT              0XA4         /* 设置MODEM信号输出 */
 #define DEF_VEN_BUF_CLEAR             0XB2         /* 清除未完成的数据 */
 #define DEF_VEN_I2C_CMD_X             0X54         /* 发出I2C接口的命令,立即执行 */
-#define DEF_VEN_DELAY_MS              0X5E         /* 以亳秒为单位延时指定时间 */
+#define DEF_VEN_DELAY_MS              0X5E         /* 以毫秒为单位延时指定时间 */
 #define DEF_VEN_GET_VER                 0X5F         /* 获取芯片版本 */
 
 /* 类请求 */
@@ -597,7 +597,7 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
   UINT8   buf[8];
   UINT8   data_dir = 0;   //数据方向
   UINT8   ep_idx, ep_pid;
-  UINT8   i;
+  UINT8   i, j;
   UINT8   ep_sta;
 
   //for(i=0; i<USB_IRQ_FLAG_NUM; i++)
@@ -627,8 +627,8 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
           len = usb_irq_len[i];
           {
             //Ep2OUTDataBuf
-            for(int i = 0;i<len;i++)
-            dg_log("%02x  ",Ep2OUTDataBuf[i]);
+            for(j = 0; j < len; j++)
+            dg_log("%02x  ",Ep2OUTDataBuf[j]);
             dg_log("\n");
 
             //CH341的数据下发
@@ -651,8 +651,8 @@ void USB_IRQProcessHandler( void )   /* USB中断服务程序 */
           dg_log("usb_rec\n");
           len = usb_irq_len[i];
           //Ep1OUTDataBuf
-          for(int i = 0;i<len;i++)
-          dg_log("%02x  ",Ep1OUTDataBuf[i]);
+          for(j = 0; j < len; j++)
+          dg_log("%02x  ",Ep1OUTDataBuf[j]);
           dg_log("\n");
 
           //CH341的数据下发
@@ -1766,7 +1766,7 @@ void InitCDCDevice(void)
   /* 设备地址 */
   R8_USB_DEV_AD = 0x00;
 
-  //禁止DP/DM下拉电阻s
+  //禁止DP/DM下拉电阻
   R8_UDEV_CTRL = RB_UD_PD_DIS;
 
   //启动USB设备及DMA，在中断期间中断标志未清除前自动返回NAK
@@ -1829,7 +1829,7 @@ void InitVendorDevice(void)
   /* 设备地址 */
   R8_USB_DEV_AD = 0x00;
 
-  //禁止DP/DM下拉电阻s
+  //禁止DP/DM下拉电阻
   R8_UDEV_CTRL = RB_UD_PD_DIS;
 
   //启动USB设备及DMA，在中断期间中断标志未清除前自动返回NAK
@@ -1954,8 +1954,9 @@ void DebugInit( void )
   UART_DefInit();
 }
 
-int main()
+int main(void)
 {
+    FlashLock();
   SetSysClock( CLK_SOURCE_HSE_PLL_100MHz );
 
   DebugInit();

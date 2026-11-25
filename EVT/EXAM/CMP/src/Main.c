@@ -12,7 +12,7 @@
 
 #include "CH57x_common.h"
 
-volatile uint8_t cmp_Itfalg = 0;
+volatile uint8_t cmp_ItFlag = 0;
 const CMPOutSelTypeDef ITMode = cmp_out_sel_rise;
 
 #define OUT_TO_TIM_CAP  1
@@ -23,8 +23,9 @@ const CMPOutSelTypeDef ITMode = cmp_out_sel_rise;
  *
  * @return  none
  */
-int main()
+int main(void)
 {
+    FlashLock();
     // 关闭两线调试
     R16_PIN_ALTERNATE &= ~RB_PIN_DEBUG_EN;
     HSECFG_Capacitance( HSECap_18p );
@@ -37,23 +38,25 @@ int main()
     UART_DefInit();
     PRINT( "Start @ChipID=%02X\n", R8_CHIP_ID );
 
+    GPIOA_ModeCfg( GPIO_Pin_7, GPIO_ModeIN_Floating );   // CMP_P0 = PA7 配置为浮空输入
     CMP_Init( cmp_sw_3, cmp_nref_level_800 );  //内部参考电压档位800mv
-
-    CMP_INTCfg( ITMode, ENABLE );
-    CMP_ClearITStatus();
-    PFIC_EnableIRQ( CMP_IRQn );
 
 #if OUT_TO_TIM_CAP //比较器输出到定时器捕获
     CMP_OutToTIMCAPCfg( ENABLE );
-    TMR_CAPTimeoutCfg( 0xFFFFFFFF ); // 设置捕捉超时时间
+    TMR_CAPTimeoutCfg( 0x02000000 ); // 设置捕捉超时时间
     R8_TMR_INT_FLAG |= RB_TMR_IF_DATA_ACT;
     TMR_CapInit( RiseEdge_To_RiseEdge );
 #endif
 
     CMP_Enable();
+
+    CMP_INTCfg( ITMode, ENABLE );
+    CMP_ClearITStatus();
+    PFIC_EnableIRQ( CMP_IRQn );
+
     while (1)
     {
-        if (cmp_Itfalg)
+        if (cmp_ItFlag)
         {
             DelayUs (1);
             if (CMP_ReadAPROut())
@@ -64,13 +67,13 @@ int main()
             {
                 PRINT ("CMP_0\n");
             }
-            cmp_Itfalg = 1;
+            cmp_ItFlag = 0;
             CMP_INTCfg (ITMode, ENABLE);
         }
 #if OUT_TO_TIM_CAP
         if (R8_TMR_INT_FLAG & RB_TMR_IF_DATA_ACT)
         {
-            R8_TMR_INT_FLAG |= RB_TMR_IF_DATA_ACT;
+            TMR_ClearITFlag( TMR_IT_DATA_ACT );
             PRINT ("c:%ld\r\n", R32_TMR_FIFO);
         }
 #endif
@@ -92,6 +95,6 @@ void CMP_IRQHandler( void )
     {
         CMP_ClearITStatus();
         CMP_INTCfg( ITMode, DISABLE );
-        cmp_Itfalg = 1;
+        cmp_ItFlag = 1;
     }
 }

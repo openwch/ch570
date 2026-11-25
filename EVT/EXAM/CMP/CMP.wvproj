@@ -1,16 +1,24 @@
 {
 	"version": "1.0",
+	"hasAllParsed": true,
 	"isNormalMRSProject": true,
 	"basic": {
 		"chipInfo": {
 			"vendor": "WCH",
 			"toolchain": "RISC-V",
-			"series": "CH32L103",
+			"series": "CH572",
 			"rtos": "NoneOS",
-			"mcu": "CH32L103C8T6",
+			"mcu": "CH572D",
 			"description": "",
+			"tempratureScope": "",
+			"artifactType": "executable",
 			"link": "WCH-Link",
-			"peripheral_version": "1.0"
+			"peripheral_version": "1.3",
+			"calibrateSupport": false,
+			"calibrateCommand": "",
+			"UIConfigSupport": false,
+			"UIConfigCommand": "",
+			"externalFlashSupport": false
 		},
 		"linkedFolders": [
 			{
@@ -35,6 +43,21 @@
 				"parentLogicPath": "",
 				"type": "file",
 				"name": "*.wvproj"
+			},
+			{
+				"parentLogicPath": "",
+				"type": "file",
+				"name": "*.7z"
+			},
+			{
+				"parentLogicPath": "",
+				"type": "file",
+				"name": "*.zip"
+			},
+			{
+				"parentLogicPath": "",
+				"type": "file",
+				"name": "*.tar"
 			}
 		],
 		"projectName": "CMP",
@@ -56,38 +79,7 @@
 				"pre_script_description": "",
 				"post_script": "",
 				"post_script_description": "",
-				"excludeResources": [
-					"${project}/StdPeriphDriver/CH59x_usbhostClass.c",
-					"${project}/StdPeriphDriver/CH59x_usbhostBase.c",
-					"${project}/StdPeriphDriver/CH59x_usbdev.c",
-					"${project}/StdPeriphDriver/CH59x_uart3.c",
-					"${project}/StdPeriphDriver/CH59x_uart2.c",
-					"${project}/StdPeriphDriver/CH59x_timer3.c",
-					"${project}/StdPeriphDriver/CH59x_timer2.c",
-					"${project}/StdPeriphDriver/CH59x_timer1.c",
-					"${project}/StdPeriphDriver/CH59x_timer0.c",
-					"${project}/StdPeriphDriver/CH59x_spi0.c",
-					"${project}/StdPeriphDriver/CH59x_pwm.c",
-					"${project}/StdPeriphDriver/CH59x_adc.c"
-				],
-				"riscvTargetProcessor": {
-					"architecture": "rv32i",
-					"multiply_extension": true,
-					"atomic_extension": false,
-					"floating_point": "none",
-					"compressed_extension": true,
-					"extra_compressed_extension": true,
-					"bit_extension": true,
-					"multiplication_subset_of_the_M_extension": false,
-					"integer_ABI": "ilp32",
-					"floating_point_ABI": "none",
-					"tuning": "default",
-					"code_model": "any",
-					"small_data_limit": 8,
-					"align": "default",
-					"save_restore": false,
-					"other_target_flags": ""
-				},
+				"excludeResources": [],
 				"optimization": {
 					"level": "size",
 					"message_length": true,
@@ -106,6 +98,7 @@
 					"code_generation_without_hardware_floating": false,
 					"use_pipelines": false,
 					"show_caret_indicating_the_column": false,
+					"calling_convention_variant": false,
 					"other_optimization_flags": ""
 				},
 				"warnings": {
@@ -114,9 +107,9 @@
 					"pedantic_warnings_as_errors": false,
 					"inhibit_all_warnings": false,
 					"warn_on_various_unused_elements": false,
-					"warn_on_uninitialized_variables": false,
+					"warn_on_uninitialized_variables": true,
 					"enable_all_common_warnings": false,
-					"enable_extra_warnings": false,
+					"enable_extra_warnings": true,
 					"warn_on_undeclared_global_function": false,
 					"warn_on_implicit_conversions": false,
 					"warn_if_pointer_arthmetic": false,
@@ -243,12 +236,9 @@
 						"omit_all_symbol_information": false
 					},
 					"libraries": {
-						"libraries": [
-							"ISP572"
-						],
+						"libraries": [],
 						"library_search_path": [
-							"../",
-							"${project}/StdPeriphDriver"
+							"../"
 						]
 					},
 					"miscellaneous": {
@@ -284,12 +274,9 @@
 						"omit_all_symbol_information": false
 					},
 					"libraries": {
-						"libraries": [
-							"ISP572"
-						],
+						"libraries": [],
 						"library_search_path": [
-							"../",
-							"${project}/StdPeriphDriver"
+							"../"
 						]
 					},
 					"miscellaneous": {
@@ -313,7 +300,8 @@
 					}
 				},
 				"archiver": {
-					"archiver_flags": "-r"
+					"archiver_flags": "-r",
+					"libOutputPrefix": "lib"
 				},
 				"createFlash": {
 					"enabled": true,
@@ -321,6 +309,7 @@
 					"copy_only_section_text": false,
 					"copy_only_section_data": false,
 					"copy_only_sections": [],
+					"create_algorithm_file": false,
 					"other_flags": ""
 				},
 				"createList": {
@@ -344,9 +333,28 @@
 					"show_totals": false,
 					"other_flags": ""
 				},
+				"configVariables": [],
+				"riscvTargetProcessor": {
+					"architecture": "rv32i",
+					"multiply_extension": true,
+					"atomic_extension": false,
+					"floating_point": "none",
+					"compressed_extension": true,
+					"extra_compressed_extension": true,
+					"bit_extension": true,
+					"multiplication_subset_of_the_M_extension": false,
+					"vector_cryptography_extensions": "",
+					"integer_ABI": "ilp32",
+					"floating_point_ABI": "none",
+					"tuning": "default",
+					"code_model": "any",
+					"small_data_limit": 8,
+					"align": "default",
+					"save_restore": false,
+					"other_target_flags": ""
+				},
 				"component_toolchain": "${WCH:Toolchain:GCC12}",
-				"name": "obj",
-				"configVariables": []
+				"name": "obj"
 			},
 			{
 				"buildArtifact": {
@@ -361,38 +369,7 @@
 				"pre_script_description": "",
 				"post_script": "",
 				"post_script_description": "",
-				"excludeResources": [
-					"${project}/StdPeriphDriver/CH59x_usbhostClass.c",
-					"${project}/StdPeriphDriver/CH59x_usbhostBase.c",
-					"${project}/StdPeriphDriver/CH59x_usbdev.c",
-					"${project}/StdPeriphDriver/CH59x_uart3.c",
-					"${project}/StdPeriphDriver/CH59x_uart2.c",
-					"${project}/StdPeriphDriver/CH59x_timer3.c",
-					"${project}/StdPeriphDriver/CH59x_timer2.c",
-					"${project}/StdPeriphDriver/CH59x_timer1.c",
-					"${project}/StdPeriphDriver/CH59x_timer0.c",
-					"${project}/StdPeriphDriver/CH59x_spi0.c",
-					"${project}/StdPeriphDriver/CH59x_pwm.c",
-					"${project}/StdPeriphDriver/CH59x_adc.c"
-				],
-				"riscvTargetProcessor": {
-					"architecture": "rv32i",
-					"multiply_extension": true,
-					"atomic_extension": false,
-					"floating_point": "none",
-					"compressed_extension": true,
-					"extra_compressed_extension": true,
-					"bit_extension": true,
-					"multiplication_subset_of_the_M_extension": false,
-					"integer_ABI": "ilp32",
-					"floating_point_ABI": "none",
-					"tuning": "default",
-					"code_model": "any",
-					"small_data_limit": 8,
-					"align": "default",
-					"save_restore": false,
-					"other_target_flags": ""
-				},
+				"excludeResources": [],
 				"optimization": {
 					"level": "size",
 					"message_length": true,
@@ -411,6 +388,7 @@
 					"code_generation_without_hardware_floating": false,
 					"use_pipelines": false,
 					"show_caret_indicating_the_column": false,
+					"calling_convention_variant": false,
 					"other_optimization_flags": ""
 				},
 				"warnings": {
@@ -548,12 +526,9 @@
 						"omit_all_symbol_information": false
 					},
 					"libraries": {
-						"libraries": [
-							"ISP572"
-						],
+						"libraries": [],
 						"library_search_path": [
-							"../",
-							"${project}/StdPeriphDriver"
+							"../"
 						]
 					},
 					"miscellaneous": {
@@ -589,12 +564,9 @@
 						"omit_all_symbol_information": false
 					},
 					"libraries": {
-						"libraries": [
-							"ISP572"
-						],
+						"libraries": [],
 						"library_search_path": [
-							"../",
-							"${project}/StdPeriphDriver"
+							"../"
 						]
 					},
 					"miscellaneous": {
@@ -618,7 +590,8 @@
 					}
 				},
 				"archiver": {
-					"archiver_flags": "-r"
+					"archiver_flags": "-r",
+					"libOutputPrefix": "lib"
 				},
 				"createFlash": {
 					"enabled": true,
@@ -626,6 +599,7 @@
 					"copy_only_section_text": false,
 					"copy_only_section_data": false,
 					"copy_only_sections": [],
+					"create_algorithm_file": false,
 					"other_flags": ""
 				},
 				"createList": {
@@ -649,26 +623,47 @@
 					"show_totals": false,
 					"other_flags": ""
 				},
+				"configVariables": [],
+				"riscvTargetProcessor": {
+					"architecture": "rv32i",
+					"multiply_extension": true,
+					"atomic_extension": false,
+					"floating_point": "none",
+					"compressed_extension": true,
+					"extra_compressed_extension": true,
+					"bit_extension": true,
+					"multiplication_subset_of_the_M_extension": false,
+					"vector_cryptography_extensions": "",
+					"integer_ABI": "ilp32",
+					"floating_point_ABI": "none",
+					"tuning": "default",
+					"code_model": "any",
+					"small_data_limit": 8,
+					"align": "default",
+					"save_restore": false,
+					"other_target_flags": ""
+				},
 				"component_toolchain": "${WCH:Toolchain:GCC12}",
-				"name": "dbg",
-				"configVariables": []
+				"name": "dbg"
 			}
 		]
 	},
 	"flashConfig": {
-		"mcutype": "",
-		"address": "",
+		"mcutype": "CH570/2",
+		"address": "0x00000000",
 		"target_path": "obj/CMP.hex",
 		"clkSpeed": "High",
 		"debug_interface_mode": "1-wire serial",
-		"erase": false,
-		"program": false,
-		"verify": false,
-		"reset": false,
+		"erase": true,
+		"program": true,
+		"verify": true,
+		"reset": true,
 		"sdiPrintf": false,
 		"disablepowerout": false,
 		"clearcodeflash": false,
 		"disablecodeprotect": false,
+		"flashType": "",
+		"asmFile_path": "",
 		"exepath": "",
 		"exearguments": ""
 	},
@@ -682,7 +677,7 @@
 			"configOptions": [
 				"-f \"${WCH:OpenOCD:default}/bin/wch-riscv.cfg\""
 			],
-			"host": "localhost",
+			"host": "127.0.0.1",
 			"port": 3333,
 			"skipDownloadBeforeDebug": false,
 			"enablePageEraser": false,
@@ -730,7 +725,7 @@
 			},
 			"debugInRAM": false
 		},
-		"svdpath": null,
+		"svdpath": "${WCH:SDK:default}/RISC-V/CH572/NoneOS/CH572.svd",
 		"output": {
 			"showDebugGDBTrace": true,
 			"saveDebugOutputToFile": false,

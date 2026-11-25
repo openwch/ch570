@@ -649,7 +649,7 @@ uint8_t CtrlClearEndpStall(uint8_t endp)
 }
 
 /*********************************************************************
- * @fn      CtrlSetUsbIntercace
+ * @fn      CtrlSetUsbInterface
  *
  * @brief   设置USB设备接口
  *
@@ -657,7 +657,7 @@ uint8_t CtrlClearEndpStall(uint8_t endp)
  *
  * @return  ERR_SUCCESS     成功
  */
-uint8_t CtrlSetUsbIntercace(uint8_t cfg)
+uint8_t CtrlSetUsbInterface(uint8_t cfg)
 {
     CopySetupReqPkg(SetupSetUsbInterface);
     pSetupReq->wValue = cfg;               // USB设备配置
